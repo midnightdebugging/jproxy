@@ -1,0 +1,119 @@
+package org.pierce.nlist.gfw;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class NameItem {
+
+    public enum CMD {
+        DIRECT,
+        //ban domain name resolution and ip accesses
+        FORWARD0,
+        //ban domain name resolution but ip accesses is ok
+        FORWARD1,
+        NO_MATCH,
+        UN_KNOW
+    }
+
+
+    public enum TYPE {
+        STRING,
+        REGULAR,
+        END_WITH
+    }
+
+
+    CMD cmd;
+
+    TYPE type;
+
+    String data;
+
+    String oriData;
+
+    Pattern pattern;
+
+    int sortingFactor;
+
+    public NameItem() {
+    }
+
+    public NameItem(CMD cmd, TYPE type, String data) {
+        this.cmd = cmd;
+        this.type = type;
+        this.data = data;
+    }
+
+    public CMD getCmd() {
+        return cmd;
+    }
+
+    public void setCmd(CMD cmd) {
+        this.cmd = cmd;
+    }
+
+    public TYPE getType() {
+        return type;
+    }
+
+    public void setType(TYPE type) {
+        this.type = type;
+    }
+
+    public String getData() {
+        return data;
+    }
+
+    public void setData(String data) {
+        this.data = data;
+    }
+
+    public Pattern getPattern() {
+        return pattern;
+    }
+
+    public void setPattern(Pattern pattern) {
+        this.pattern = pattern;
+    }
+
+    public String getOriData() {
+        return oriData;
+    }
+
+    public void setOriData(String oriData) {
+        this.oriData = oriData;
+    }
+
+    @Override
+    public String toString() {
+        return "SocksRule{" +
+                "cmd=" + cmd +
+                ", type=" + type +
+                ", data='" + data + '\'' +
+                ", oriData='" + oriData + '\'' +
+                ", pattern=" + pattern +
+                '}';
+    }
+
+    public CMD check(String str) {
+        if (this.type == TYPE.STRING || this.type == TYPE.REGULAR) {
+            Matcher m = pattern.matcher(str);
+            if (m.find()) {
+                return this.cmd;
+            }
+        } else if (this.type == TYPE.END_WITH) {
+            if (("." + str).endsWith(data)) {
+                return this.cmd;
+            }
+        }
+        return CMD.NO_MATCH;
+    }
+
+    public int getSortingFactor() {
+        return sortingFactor;
+    }
+
+    public void setSortingFactor(int sortingFactor) {
+        this.sortingFactor = sortingFactor;
+    }
+}

@@ -1,0 +1,170 @@
+package org.pierce.nlist.gfw;
+
+
+import org.pierce.nlist.ByteArrayScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
+import java.util.regex.Pattern;
+
+
+/**
+ * 支持通过 --user-rule 自定义单个规则或 --user-rule-from 读入自定义规则文件，这两个参数均可重复使用。
+ * <p>
+ * 自定义规则文件可参考 user-rules-sample.txt
+ * <p>
+ * 自定义规则的语法与 gfwlist 相同，使用 AdBlock Plus 过滤规则( <a href="http://adblockplus.org/en/filters">...</a> )，简述如下:
+ * <p>
+ * 通配符支持，如 *.example.com/* 实际书写时可省略 * 为 .example.com/
+ * 正则表达式支持，以 \ 开始和结束， 如 \[\w]+:\/\/example.com\\
+ * 例外规则 @@，如 @@*.example.com/* 满足 @@ 后规则的地址不使用代理
+ * 匹配地址开始和结尾 |，如 |http://example.com、example.com| 分别表示以 http://example.com 开始和以 example.com 结束的地址
+ * || 标记，如 ||example.com 则 http://example.com https://example.com ftp://example.com 等地址均满足条件
+ * 注释 ! 如 ! Comment
+ * <p>
+ * 配置自定义规则时需谨慎，尽量避免与gfwlist产生冲突，或将一些本不需要代理的网址添加到代理列表
+ * <p>
+ * 规则优先级从高到底为: user-rule > user-rule-from > gfwlist
+ */
+public class NameListCheck {
+
+    private static final Logger log = LoggerFactory.getLogger(NameListCheck.class);
+
+    List<NameItem> socksRules = new ArrayList<>();
+
+
+
+    private NameListCheck() {
+
+    }
+
+    public static NameListCheck parse(String str) {
+        log.debug(str);
+        NameListCheck nameListCheck = new NameListCheck();
+
+
+        ByteArrayScanner sc = new ByteArrayScanner(str.getBytes());
+        while (true) {
+            String line = sc.nextLine();
+            if (line == null) {
+                break;
+            }
+            if (line.startsWith("!")) {
+                continue;
+            }
+            NameItem rule = new NameItem();
+            rule.setOriData(line);
+            rule.setSortingFactor(9);
+            if (line.startsWith("@@")) {
+
+                rule.setCmd(NameItem.CMD.DIRECT);
+                line = line.replaceAll("^@@", "");
+                rule.setSortingFactor(0);
+            } else {
+                rule.setCmd(NameItem.CMD.FORWARD0);
+            }
+            if (line.startsWith("/")) {
+                rule.setType(NameItem.TYPE.REGULAR);
+                line = line.replaceAll("^/|/$", "");
+                rule.setPattern(Pattern.compile(line));
+            } else if (line.startsWith("||")) {
+                rule.setType(NameItem.TYPE.STRING);
+                line = line.replaceAll("^\\|\\|", "");
+
+
+                String regex = line;
+                regex = regex.replaceAll("^\\.", "");
+                regex = regex.replaceAll("^http://([^:/]*)(:\\d*)?(/.*)?$|^https?://\\[([a-zA-Z0-9:]*)].*$", "$1$4");
+                regex = regex.replaceAll("([^0-9a-zA-Z*])", "\\\\$1");
+                regex = regex.replaceAll("\\*", ".*");
+                regex = regex + "$";
+                rule.setPattern(Pattern.compile(regex));
+
+            } else if (line.startsWith("|")) {
+                rule.setType(NameItem.TYPE.STRING);
+                line = line.replaceAll("^\\|", "");
+                rule.setCmd(NameItem.CMD.FORWARD1);
+
+                String regex = line;
+                regex = regex.replaceAll("^\\.", "");
+                regex = regex.replaceAll("^http://([^:/]*)(:\\d*)?(/.*)?$|^https?://\\[([a-zA-Z0-9:]*)].*$", "$1$4");
+                regex = regex.replaceAll("([^0-9a-zA-Z*])", "\\\\$1");
+                regex = regex.replaceAll("\\*", ".*");
+                regex = regex + "$";
+                rule.setPattern(Pattern.compile(regex));
+
+            } else {
+                //line = line.replaceAll("^\\.", "");
+                rule.setType(NameItem.TYPE.END_WITH);
+                rule.setCmd(NameItem.CMD.FORWARD0);
+            }
+            rule.setData(line);
+            nameListCheck.socksRules.add(rule);
+        }
+        Object[] arr = nameListCheck.socksRules.toArray();
+        Arrays.sort(arr, new Comparator<Object>() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                NameItem r1 = (NameItem) o1;
+                NameItem r2 = (NameItem) o2;
+                if (r1.getSortingFactor() == r2.getSortingFactor()) {
+                    return 0;
+                } else if (r1.getSortingFactor() > r2.getSortingFactor()) {
+                    return 1;
+                }
+                return -1;
+            }
+        });
+        nameListCheck.socksRules = new ArrayList<>();
+        for (Object o : arr) {
+            nameListCheck.socksRules.add((NameItem) o);
+        }
+        return nameListCheck;
+    }
+
+    public static NameListCheck parserFromClassPath(String path) {
+        byte[] buffer = new byte[1024];
+        try (InputStream is = NameListCheck.class.getResourceAsStream("/gfwlist.txt"); ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+
+            if (is == null) {
+                return null;
+            }
+            while (true) {
+                int i = is.read(buffer);
+                if (i < 0) {
+                    break;
+                }
+                os.write(buffer, 0, i);
+
+            }
+            log.debug(os.toString());
+
+            byte[] bytes = Base64.getDecoder().decode(os.toString().replaceAll("[\\r\\n]", ""));
+
+            return NameListCheck.parse(new String(bytes));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public NameItem.CMD check(String str) {
+        NameItem.CMD cmd;
+        for (NameItem r : socksRules) {
+            cmd = r.check(str);
+            if (cmd == NameItem.CMD.NO_MATCH) {
+
+                continue;
+            }
+            log.debug(String.valueOf(r));
+            return cmd;
+        }
+        return NameItem.CMD.UN_KNOW;
+    }
+
+
+}
+

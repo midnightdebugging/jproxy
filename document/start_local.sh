@@ -1,0 +1,1 @@
+java -jar -Dmybatis.env=production local-socks-1.0-SNAPSHOT-shaded.jar

@@ -1,0 +1,55 @@
+# comments 注释
+
+
+# 连接方式
+# DISALLOW_CONNECT = 禁止连接
+# DIRECT_CONNECT = 直接连接
+# DOMAIN_NAME_QUERY_FIRST = 仅域名解析，然后本地连接
+# EQUAL = 全部托管到远程
+#
+
+# 规则类型
+# REGULAR_MATCHING=正则匹配
+# SUBNET=ipv4子网 如 192.168.31.1/24
+# EQUAL=相等bb
+
+
+DISALLOW_CONNECT SUBNET 127.0.0.1/8
+DISALLOW_CONNECT SUBNET 172.16.0.0/12
+DISALLOW_CONNECT SUBNET 10.0.0.0/8
+DISALLOW_CONNECT SUBNET 192.168.0.0/16
+
+# next line is test
+#FULL_CONNECT REGULAR_MATCHING .*
+
+DIRECT_CONNECT EQUAL dl.google.com
+FULL_CONNECT REGULAR_MATCHING (^|\.)google.com$
+FULL_CONNECT EQUAL googleads.g.doubleclick.net
+FULL_CONNECT EQUAL www.google-analytics.com
+FULL_CONNECT EQUAL pagead2.googlesyndication.com
+FULL_CONNECT EQUAL tpc.googlesyndication.com
+FULL_CONNECT EQUAL www.googletagmanager.com
+FULL_CONNECT EQUAL www.google.com
+FULL_CONNECT EQUAL csp.withgoogle.com
+FULL_CONNECT EQUAL lh3.google.com
+FULL_CONNECT EQUAL ogads-pa.clients6.google.com
+FULL_CONNECT EQUAL waa-pa.clients6.google.com
+FULL_CONNECT EQUAL play.google.com
+FULL_CONNECT EQUAL lh3.googleusercontent.com
+FULL_CONNECT EQUAL ogs.google.com
+FULL_CONNECT EQUAL accounts.google.com
+FULL_CONNECT EQUAL missav.ai
+FULL_CONNECT EQUAL client-rapi-missav.recombee.com
+FULL_CONNECT EQUAL fonts.googleapis.com
+FULL_CONNECT EQUAL safebrowsing.googleapis.com
+FULL_CONNECT EQUAL ep2.adtrafficquality.google
+FULL_CONNECT EQUAL google.com
+FULL_CONNECT EQUAL www.googleadservices.com
+FULL_CONNECT EQUAL id.google.com
+FULL_CONNECT EQUAL missav.live
+FULL_CONNECT EQUAL missav.ghost.io
+FULL_CONNECT EQUAL github.com
+FULL_CONNECT EQUAL www.hetushu.com
+FULL_CONNECT EQUAL developer.android.com
+FULL_CONNECT EQUAL iyinghua.com
+DOMAIN_NAME_QUERY_FIRST REGULAR_MATCHING [a-zA-Z]$

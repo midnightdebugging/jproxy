@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/common/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/common/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dns/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/dns/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/local-server/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/local-server/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/name-list/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/name-list/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/pki/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/pki/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/remote-server/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/remote-server/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/socks/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/socks/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
+  </component>
+</project>

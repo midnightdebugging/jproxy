@@ -1,0 +1,50 @@
+package org.pierce.nlist;
+
+public class ByteArrayScanner {
+    byte[] buffer;
+
+    int index = 0;
+
+    public ByteArrayScanner(byte[] buffer) {
+        this.buffer = buffer;
+    }
+
+    public String nextLine() {
+
+        while (true) {
+            if (index > buffer.length) {
+                return null;
+            }
+            int start = index;
+            int end = start;
+            String ret = null;
+            int i;
+            for (i = start; i < buffer.length; i++) {
+                if (buffer[i] == '\r' || buffer[i] == '\n') {
+
+                    break;
+                }
+            }
+            end = i;
+            index = end + 1;
+            ret = new String(buffer, start, end - start);
+            if (ret.trim().isEmpty()) {
+                continue;
+            }
+            return ret.trim();
+        }
+
+
+    }
+
+    public static void main(String[] args) {
+        ByteArrayScanner sc = new ByteArrayScanner("123\r\n456\r78910\nxxxxx".getBytes());
+        while (true) {
+            String line = sc.nextLine();
+            if (line == null) {
+                break;
+            }
+            System.out.println(line);
+        }
+    }
+}

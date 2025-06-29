@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <properties>
+        <property name="jdbc.driver" value="${jdbc.driver}"/>
+        <property name="jdbc.url" value="${jdbc.url}"/>
+        <property name="jdbc.username" value="${jdbc.username}"/>
+        <property name="jdbc.password" value="${jdbc.password}"/>
+    </properties>
+    <settings>
+        <!-- 设置日志实现，值为 SLF4J | LOG4J | LOG4J2 | JDK_LOGGING | COMMONS_LOGGING | STDOUT_LOGGING | NO_LOGGING -->
+        <setting name="logImpl" value="SLF4J"/>
+    </settings>
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC">
+                <property name="" value=""/>
+            </transactionManager>
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <!--填写你的数据库用户名-->
+                <property name="username" value="${jdbc.username}"/>
+                <!--填写你的数据库密码-->
+                <property name="password" value="${jdbc.password}"/>
+
+                <property name="poolMaximumActiveConnections" value="10"/>
+                <property name="poolMaximumIdleConnections" value="5"/>
+
+            </dataSource>
+        </environment>
+    </environments>
+
+    <mappers>
+        <package name="org.pierce.mybatis"/>
+        <package name="org.pierce.nlist.mapper"/>
+    </mappers>
+
+</configuration>

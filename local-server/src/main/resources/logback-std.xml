@@ -1,0 +1,41 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36}:%L %M - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 文件输出器 -->
+    <appender name="ROLLING_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 当前日志文件路径 -->
+        <file>/tmp/logs/local-server.log</file>
+
+        <!-- 滚动策略 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 滚动文件名模式 -->
+            <fileNamePattern>/tmp/logs/local-server.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+
+            <!-- 单个文件最大大小 -->
+            <maxFileSize>100MB</maxFileSize>
+
+            <!-- 保留最近30天的日志 -->
+            <maxHistory>30</maxHistory>
+
+            <!-- 所有日志文件总大小上限 -->
+            <totalSizeCap>10GB</totalSizeCap>
+        </rollingPolicy>
+
+        <!-- 日志格式 -->
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36}:%L %M - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 设置包级别的日志 -->
+    <logger name="org.pierce" level="INFO"/>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="ROLLING_FILE"/>
+    </root>
+</configuration>

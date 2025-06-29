@@ -1,0 +1,1 @@
+sqlite3 jproxy.sqlite3 ".dump NameList" > NameList.sql
