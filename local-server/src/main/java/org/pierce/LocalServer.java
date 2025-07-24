@@ -13,8 +13,11 @@ import org.pierce.mybatis.mapper.HostName2AddressMapper;
 import org.pierce.nlist.NameListCheck;
 import org.pierce.nlist.imp.DataBaseNameListCheck;
 import org.pierce.nlist.imp.FixedReturnConnectListCheck;
+import org.pierce.nlist.imp.GFWNameListCheck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 
 public class LocalServer {
@@ -30,7 +33,7 @@ public class LocalServer {
 
     private final Selector<String> stringSelector = new DefaultSelector<>();
 
-   // private final Selector<HostName2Address> hostName2AddressDefaultSelector = new DefaultSelector<>();
+    // private final Selector<HostName2Address> hostName2AddressDefaultSelector = new DefaultSelector<>();
 
     private LocalServer() {
 
@@ -45,7 +48,16 @@ public class LocalServer {
         if ("fixed".equals(JproxyProperties.getProperty("connect-debug"))) {
             nameListCheck = new FixedReturnConnectListCheck();
         } else {
-            nameListCheck = new DataBaseNameListCheck();
+            /*nameListCheck = new DataBaseNameListCheck();*/
+            nameListCheck = new GFWNameListCheck() {
+                {
+                    try {
+                        loadConfigure();
+                    } catch (IOException e) {
+                        log.error("loadConfigure,error", e);
+                    }
+                }
+            };
 
         }
 
@@ -81,12 +93,6 @@ public class LocalServer {
     }
 
     public static void main(String[] args) {
-        if(false){
-            log.info(JproxyProperties.getProperty("jdbc.url"));
-            log.info(JproxyProperties.getProperty("jdbc.driver"));
-            log.info(JproxyProperties.getProperty("jdbc.url"));
-            return;
-        }
         EventLoopGroup eventLoopGroup = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override

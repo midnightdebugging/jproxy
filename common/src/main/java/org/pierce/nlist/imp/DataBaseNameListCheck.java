@@ -14,14 +14,14 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class DataBaseNameListCheck implements NameListCheck {
+public class DataBaseNameListCheck extends DefaultNameListCheck implements NameListCheck {
 
     final Pattern pattern = Pattern.compile("(.*)/(.*)");
 
     final List<EntityDesc> entityDescList = new ArrayList<>();
 
 
-    public DataBaseNameListCheck(){
+    public DataBaseNameListCheck() {
         try (SqlSession sqlSession = DataBase.getSqlSessionFactory().openSession()) {
             NameListMapper mapper = sqlSession.getMapper(NameListMapper.class);
             List<NameEntity> list = mapper.selectAll();
@@ -55,27 +55,25 @@ public class DataBaseNameListCheck implements NameListCheck {
         }
     }
 
-
     @Override
-    public Directive check(String input) {
+    public Directive check(String address, int port) {
 
         for (EntityDesc entityDesc : entityDescList) {
-            Directive directive = entityDesc.test(input);
+            Directive directive = entityDesc.test(address);
             if (directive != Directive.MISS) {
                 return directive;
             }
         }
-        return Directive.MISS;
+        return super.check(address, port);
     }
 
-    @Override
-    public Directive check(String name, Directive defaultDirective) {
-        Directive directive = check(name);
+/*    @Override
+    public Directive check(String address, int port, Directive defaultDirective) {
+        Directive directive = check(address,port);
         if (directive == Directive.MISS) {
             return defaultDirective;
         }
         return directive;
-    }
-
+    }*/
 
 }

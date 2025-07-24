@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.pierce</groupId>
         <artifactId>jproxy</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>${jproxy.version}</version>
     </parent>
 
     <artifactId>common</artifactId>

@@ -122,7 +122,7 @@ public class HttpProxyServerHandler extends SimpleChannelInboundHandler<HttpObje
         });
 
 
-        LocalServer.getInstance().connectionTypeCheck.check(ctx.channel().eventLoop(), targetAddress, promise);
+        LocalServer.getInstance().connectionTypeCheck.check(ctx.channel().eventLoop(), targetAddress, targetPort, promise);
     }
 
 

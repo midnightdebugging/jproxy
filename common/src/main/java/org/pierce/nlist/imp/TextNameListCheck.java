@@ -15,7 +15,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TextNameListCheck implements NameListCheck {
+public class TextNameListCheck extends DefaultNameListCheck  implements NameListCheck {
     private static final Logger log = LoggerFactory.getLogger(TextNameListCheck.class);
 
 
@@ -92,25 +92,24 @@ public class TextNameListCheck implements NameListCheck {
 
 
     @Override
-    public Directive check(String input) {
-
+    public Directive check(String address, int port) {
         for (EntityDesc entityDesc : entityDescList) {
-            Directive directive = entityDesc.test(input);
+            Directive directive = entityDesc.test(address);
             if (directive != Directive.MISS) {
                 return directive;
             }
         }
-        return Directive.MISS;
+        return super.check(address, port);
     }
 
-    @Override
-    public Directive check(String name, Directive defaultDirective) {
-        Directive directive = check(name);
+    /*@Override
+    public Directive check(String address, int port, Directive defaultDirective) {
+        Directive directive = check(address, port);
         if (directive == Directive.MISS) {
             return defaultDirective;
         }
         return directive;
-    }
+    }*/
 
     public List<EntityDesc> getEntityDescList() {
         return entityDescList;

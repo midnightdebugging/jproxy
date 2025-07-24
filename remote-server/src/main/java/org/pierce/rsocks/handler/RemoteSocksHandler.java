@@ -28,7 +28,7 @@ public class RemoteSocksHandler extends SimpleChannelInboundHandler<SocksCommand
         if (msg instanceof SocksCommandConnectRequest) {
             String address = ((SocksCommandConnectRequest) msg).getTarget();
             int port = ((SocksCommandConnectRequest) msg).getPort();
-            Directive directive = RemoteServer.getNameListCheck().check(address);
+            Directive directive = RemoteServer.getNameListCheck().check(address, port);
             if (directive == Directive.DISALLOW_CONNECT) {
                 SocksCommandConnectResponse resp = new SocksCommandConnectResponse();
                 resp.setCode(SocksCommandResponseCode.DISALLOW_CONNECT);
@@ -70,7 +70,7 @@ public class RemoteSocksHandler extends SimpleChannelInboundHandler<SocksCommand
                 try {
                     InetAddress inetAddress = InetAddress.getByName(address);
                     String newAddress = inetAddress.getHostAddress();
-                    Directive directive1 = RemoteServer.getNameListCheck().check(address);
+                    Directive directive1 = RemoteServer.getNameListCheck().check(address, port);
                     if (directive1 == Directive.DISALLOW_CONNECT) {
                         SocksCommandConnectResponse resp = new SocksCommandConnectResponse();
                         resp.setCode(SocksCommandResponseCode.DISALLOW_CONNECT);

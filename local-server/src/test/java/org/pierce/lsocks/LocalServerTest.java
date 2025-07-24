@@ -12,7 +12,7 @@ public class LocalServerTest {
         LocalServer.getInstance().initialize();
     }
     public void test001(NameListCheck check, String input) {
-        System.out.printf("%s ==> %s\n", input, check.check(input));
+        System.out.printf("%s ==> %s\n", input, check.check(input,443));
     }
     @Test
     public void test001(){
