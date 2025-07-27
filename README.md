@@ -90,7 +90,7 @@ Update your file using the following command。<br>
 # Set up the env you are using
 env=dev
 
-curl https://gitlab.com/gfwlist/gfwlist/raw/master/gfwlist.txt > "$HOME/.jproxy/${env}/gfw-list.txt.0"
+curl https://gitlab.com/gfwlist/gfwlist/raw/master/gfwlist.txt > "$HOME/.jproxy/${env}/gfw-list.txt"
 
 ```
 
