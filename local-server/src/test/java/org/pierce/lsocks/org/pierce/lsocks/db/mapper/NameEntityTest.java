@@ -23,7 +23,7 @@ public class NameEntityTest {
     }
 
     public void test001(NameListCheck check, String input) {
-        System.out.printf("%s ==> %s\n", input, check.check(input));
+        System.out.printf("%s ==> %s\n", input, check.check(input, -1));
     }
 
     @Test

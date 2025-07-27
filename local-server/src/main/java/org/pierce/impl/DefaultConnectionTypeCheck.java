@@ -2,6 +2,7 @@ package org.pierce.impl;
 
 import io.netty.channel.EventLoop;
 import io.netty.util.concurrent.*;
+import org.apache.commons.validator.routines.InetAddressValidator;
 import org.pierce.ConnectionTypeCheck;
 import org.pierce.LocalServer;
 import org.pierce.entity.ConnectType;
@@ -19,10 +20,11 @@ public class DefaultConnectionTypeCheck implements ConnectionTypeCheck {
 
 
     @Override
-    public void check(EventLoop eventLoop, String address, Promise<ConnectType> promise) {
+    public void check(EventLoop eventLoop, String address, int targetPort, Promise<ConnectType> promise) {
 
 
-        Directive directive = check.check(address, Directive.DIRECT_CONNECT);
+        Directive directive = check.check(address, targetPort);
+
         log.info("{} {}", directive, address);
         if (directive == Directive.DISALLOW_CONNECT) {
             promise.setSuccess(new ConnectType(directive, address));
@@ -41,7 +43,7 @@ public class DefaultConnectionTypeCheck implements ConnectionTypeCheck {
                 public void operationComplete(Future<? super String> future) throws Exception {
                     if (future.isSuccess()) {
                         String newAddress = String.valueOf(future.getNow());
-                        check(eventLoop, newAddress, promise);
+                        check(eventLoop, newAddress, targetPort, promise);
                         return;
                     }
                     promise.setFailure(new RuntimeException(String.format("domain query %s fail", address)));

@@ -29,17 +29,17 @@ public class DataBase {
     }
 
     public static void initialize(String... sqlClassPaths) throws ClassNotFoundException {
-        String jdbcFileDir = JproxyProperties.getProperty("jdbc.file-dir");
+        //String jdbcFileDir = JproxyProperties.getProperty("jdbc.file-dir");
         String jdbcFileName = JproxyProperties.getProperty("jdbc.file-name");
-        File file0 = new File(jdbcFileDir);
+        //File file0 = new File(jdbcFileDir);
         File file1 = new File(jdbcFileName);
-        if (!file0.exists()) {
+        /*if (!file0.exists()) {
             if (!file0.mkdir()) {
                 log.info("mkdir {} error {}", jdbcFileDir, "!file0.mkdir()");
                 System.exit(1);
                 return;
             }
-        }
+        }*/
 
         if (!file1.exists()) {
             String jdbcUrl = JproxyProperties.getProperty("jdbc.url");

@@ -110,7 +110,7 @@ public final class SocksServerHandler extends SimpleChannelInboundHandler<SocksM
                 ConnectType connectType = (ConnectType) future.getNow();
                 log.info("{} {} {} ==> {}", UtilTools.formatChannelInfo(ctx), connectType.getDirective(), host, connectType.getAddress());
                 if (connectType.getDirective() == Directive.DISALLOW_CONNECT) {
-                    //localLinkStatusEvent(ctx.channel(), new LocalLinkStatusEvent(LocalLinkStep.CONNECT_START, false, new RuntimeException("Directive.DISALLOW_CONNECT")));
+                    //localLinkStatusEvent(ctx.channel(), new LocalLinkStatusEvent(LocalLinkStep.CONNECT_START, false, new RuntimeException("GFWDirective.DISALLOW_CONNECT")));
                     directConnect(ctx, connectType.getAddress(), port);
                 } else if (connectType.getDirective() == Directive.DIRECT_CONNECT) {
                     directConnect(ctx, connectType.getAddress(), port);
@@ -127,7 +127,7 @@ public final class SocksServerHandler extends SimpleChannelInboundHandler<SocksM
         });
 
 
-        LocalServer.getInstance().connectionTypeCheck.check(ctx.channel().eventLoop(), host, promise);
+        LocalServer.getInstance().connectionTypeCheck.check(ctx.channel().eventLoop(), host, port, promise);
     }
 
     public void directConnect(ChannelHandlerContext ctx, String address, int port) {

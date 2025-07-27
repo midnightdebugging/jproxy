@@ -3,7 +3,7 @@
   <parent>
     <artifactId>jproxy</artifactId>
     <groupId>org.pierce</groupId>
-    <version>1.0-SNAPSHOT</version>
+    <version>${jproxy.version}</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>remote-server</artifactId>
