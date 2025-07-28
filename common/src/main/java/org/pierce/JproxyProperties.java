@@ -3,9 +3,10 @@ package org.pierce;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -19,27 +20,63 @@ public class JproxyProperties {
 
     private static final Logger log = LoggerFactory.getLogger(JproxyProperties.class);
 
+    public static void loadPropertiesByClassPath(String path) {
+        loadPropertiesByClassPath(path, false);
+    }
 
-    static {
-
-
-        try (InputStream is = UtilTools.class.getResourceAsStream("/application-common.properties")) {
-            log.info("load:/application-common.properties");
-            if (is != null) {
-                properties.load(is);
+    public static void loadPropertiesByClassPath(String path, boolean necessary) {
+        log.info("loadProperties:{}", path);
+        try (InputStream inputStream = UtilTools.class.getResourceAsStream(path)) {
+            if (inputStream == null) {
+                log.error("inputStream ==null");
+                if (necessary) {
+                    throw new RuntimeException("inputStream ==null");
+                }
+            }
+            if (inputStream != null) {
+                properties.load(inputStream);
             }
 
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            log.error("IOException", e);
+            if (necessary) {
+                throw new RuntimeException(e);
+            }
         }
 
+    }
 
-        try (InputStream is = UtilTools.class.getResourceAsStream("/application.properties")) {
-            log.info("load:/application.properties");
-            properties.load(is);
+    final static Pattern rootPathTest = Pattern.compile("^/|^[a-zA-Z]:\\\\");
+
+    public static void loadPropertiesByFilePath(String path) {
+        loadPropertiesByFilePath(path, false);
+
+    }
+
+    public static void loadPropertiesByFilePath(String path, boolean necessary) {
+        String fullPath = path;
+        if (!rootPathTest.matcher(path).find()) {
+            fullPath = evaluate("${user.dir}/" + path);
+
+        }
+
+        log.info(fullPath);
+        try (InputStream inputStream = Files.newInputStream(Paths.get(fullPath))) {
+            properties.load(inputStream);
+
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            log.error("IOException", e);
+            if (necessary) {
+                throw new RuntimeException(e);
+            }
         }
+
+    }
+
+    public static void initialize() {
+
+        loadPropertiesByClassPath("/application-common.properties",true);
+        loadPropertiesByClassPath("/application.properties",true);
 
         String env = System.getProperty("env");
         if (env == null || env.isEmpty()) {
@@ -50,26 +87,16 @@ public class JproxyProperties {
             properties.setProperty("env", "dev");
         }
 
-        String envProp = String.format("/application-%s.properties", env);
+        loadPropertiesByClassPath(evaluate("/application-{env}.properties"));
 
-        try (InputStream is = UtilTools.class.getResourceAsStream(envProp)) {
-            log.info("load:{}", envProp);
-            if (is != null) {
-                properties.load(is);
-            }
+        loadPropertiesByFilePath(getProperty("tls.properties"));
 
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
 
         properties.putAll(System.getProperties());
 
-        try (FileInputStream fileInputStream = new FileInputStream(JproxyProperties.getProperty("tls.properties"))) {
-            log.info("load:{}", JproxyProperties.getProperty("tls.properties"));
-            properties.load(fileInputStream);
-        } catch (IOException e) {
-            log.warn(JproxyProperties.getProperty("tls.properties") + "no exists");
-        }
+        properties.setProperty("jdbc.file-dir", JproxyProperties.getProperty("jdbc.file-dir"));
+        properties.setProperty("jdbc.file-name", JproxyProperties.getProperty("jdbc.file-name"));
+        properties.setProperty("jdbc.url", JproxyProperties.getProperty("jdbc.url"));
 
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<Object, Object> entry : properties.entrySet()) {
@@ -77,17 +104,13 @@ public class JproxyProperties {
         }
         log.info(sb.toString());
 
-        properties.setProperty("jdbc.file-dir", JproxyProperties.getProperty("jdbc.file-dir"));
-        properties.setProperty("jdbc.file-name", JproxyProperties.getProperty("jdbc.file-name"));
-        properties.setProperty("jdbc.url", JproxyProperties.getProperty("jdbc.url"));
-        /*jdbc.file-dir=${user.home}/.jproxy
-        jdbc.file-name=${jdbc.file-dir}/jproxy-${env}.sqlite3
-        jdbc.url=jdbc:sqlite:${jdbc.file-name}?journal_mode=WAL&busy_timeout=5000*/
+
     }
 
-    /*public static String currentTime() {
-        return new Timestamp(System.currentTimeMillis()).toString();
-    }*/
+    static {
+        initialize();
+    }
+
 
     public static String getProperty(String key) {
         if (properties.containsKey(key)) {
@@ -130,7 +153,6 @@ public class JproxyProperties {
 
     public static boolean booleanVal(String key) {
         String strVal = getProperty(key, "false");
-        //System.out.printf("%s==>%s\n", key, strVal);
         return "true".equals(strVal);
     }
 
@@ -143,19 +165,6 @@ public class JproxyProperties {
     }
 
     public static void reloadTlsProperties() {
-
-        try (FileInputStream fileInputStream = new FileInputStream(JproxyProperties.getProperty("tls.properties"))) {
-            properties.load(fileInputStream);
-            StringBuilder sb = new StringBuilder();
-            sb.append(JproxyProperties.getProperty("tls.properties"));
-            sb.append(" done\n");
-            for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-                sb.append(String.format("%s=%s\n", String.valueOf(entry.getKey()), String.valueOf(entry.getValue())));
-            }
-            log.info(sb.toString());
-
-        } catch (IOException e) {
-            log.warn(JproxyProperties.getProperty("tls.properties") + " no exists");
-        }
+        loadPropertiesByFilePath(getProperty("tls.properties"));
     }
 }
