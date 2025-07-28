@@ -14,6 +14,7 @@ import org.pierce.nlist.NameListCheck;
 import org.pierce.nlist.imp.DataBaseNameListCheck;
 import org.pierce.nlist.imp.FixedReturnConnectListCheck;
 import org.pierce.nlist.imp.GFWNameListCheck;
+import org.pierce.nlist.imp.TextNameListCheck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,10 +46,18 @@ public class LocalServer {
 
     public void initialize() {
         Jproxy.getInstance().initialize();
-        if ("fixed".equals(JproxyProperties.getProperty("connect-debug"))) {
+        if ("fixed".equals(JproxyProperties.getProperty("list-check"))) {
             nameListCheck = new FixedReturnConnectListCheck();
+        } else if ("data-base-config".equals(JproxyProperties.getProperty("list-check"))) {
+            nameListCheck = new DataBaseNameListCheck();
+        } else if ("file-config".equals(JproxyProperties.getProperty("list-check"))) {
+            nameListCheck = new TextNameListCheck() {
+                {
+                    loadByInputStream();
+                }
+
+            };
         } else {
-            /*nameListCheck = new DataBaseNameListCheck();*/
             nameListCheck = new GFWNameListCheck() {
                 {
                     try {
