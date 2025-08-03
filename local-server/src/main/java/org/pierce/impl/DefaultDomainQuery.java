@@ -19,7 +19,7 @@ public class DefaultDomainQuery {
 
     public final static String remoteAddress = JproxyProperties.getProperty("local-server.link-out.address");
 
-    public final static int remotePort = Integer.parseInt(JproxyProperties.getProperty("local-server.link-out.port"));
+    public final static int remotePort = Integer.parseInt(JproxyProperties.getProperty("local-server.remote-socks-link-out.port"));
 
     private static final Logger log = LoggerFactory.getLogger(DefaultDomainQuery.class);
 

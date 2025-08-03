@@ -62,8 +62,10 @@ public class UtilTools {
             );
         }
         String targetAddress = channel.attr(SessionAttributes.TARGET_ADDRESS).get();
-        int targetPort = channel.attr(SessionAttributes.TARGET_PORT).get();
-
+        Integer targetPort = channel.attr(SessionAttributes.TARGET_PORT).get();
+        if (targetPort == null) {
+            targetPort = -1;
+        }
         return String.format(
                 "[id: %s, L:%s - R:%s T:%s:%d]",
                 channel.id().asShortText(),

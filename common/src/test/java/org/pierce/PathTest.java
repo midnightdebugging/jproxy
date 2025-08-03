@@ -2,7 +2,6 @@ package org.pierce;
 
 import org.junit.Test;
 
-import java.util.Properties;
 import java.util.regex.Pattern;
 
 public class PathTest {

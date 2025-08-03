@@ -12,6 +12,7 @@ import org.pierce.session.SessionAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -22,15 +23,18 @@ public class LinkOutHandler extends ChannelInboundHandlerAdapter {
 
     private final static FailTryCheck failTryCheck = new MemeryFailTryCheck();
     final Channel linkInChannel;
-    private final String address;
-    private final int port;
+    //private final String address;
+    //private final int port;
     protected Channel linkOutChannel;
     final Promise<Channel> promise;
 
     Queue<Object> queue = new LinkedList<>();
 
+    String targetAddress;
+    int targetPort;
 
-    protected void initChannel(SocketChannel ch, Promise<Channel> promise) {
+
+    protected void initChannel(SocketChannel ch, Promise<Channel> promise) throws URISyntaxException {
         ch.pipeline().addLast(new DebugHandler("link-out"));
         ch.pipeline().addLast("LinkOutHandler-handler", new ChannelInboundHandlerAdapter() {
             @Override
@@ -69,10 +73,16 @@ public class LinkOutHandler extends ChannelInboundHandlerAdapter {
     }
 
     public LinkOutHandler(Channel linkInChannel, Promise<Channel> promise, String address, int port) {
+        this(linkInChannel, promise, address, port, null, 0);
+    }
+
+    public LinkOutHandler(Channel linkInChannel, Promise<Channel> promise, String address, int port, String targetAddress, int targetPort) {
+        this.targetAddress = targetAddress;
+        this.targetPort = targetPort;
         this.linkInChannel = linkInChannel;
         this.promise = promise;
-        this.address = address;
-        this.port = port;
+        //this.address = address;
+        //this.port = port;
         if (!failTryCheck.check(address)) {
             if (linkInChannel.isActive()) {
                 linkInChannel.close();
@@ -162,6 +172,10 @@ public class LinkOutHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
+    public void linkOutStatusEvent(LinkOutStatusEvent linkOutStatusEvent) {
+        linkOutStatusEvent(this.linkInChannel, this.linkOutChannel, linkOutStatusEvent);
+    }
+
     public void linkOutStatusEvent(Channel linkIn, Channel linkOut, LinkOutStatusEvent linkOutStatusEvent) {
 
         if (!linkOutStatusEvent.isSuccess()) {
@@ -193,5 +207,14 @@ public class LinkOutHandler extends ChannelInboundHandlerAdapter {
         log.debug("{} {}", UtilTools.formatChannelInfo(linkOutChannel), msg.getClass());
         //log.info("{}", msg.getClass());
         linkInChannel.writeAndFlush(msg);
+    }
+
+
+    public Channel getLinkInChannel() {
+        return linkInChannel;
+    }
+
+    public Channel getLinkOutChannel() {
+        return linkOutChannel;
     }
 }

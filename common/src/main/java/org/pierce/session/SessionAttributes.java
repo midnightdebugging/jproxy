@@ -12,4 +12,6 @@ public class SessionAttributes {
     public static final AttributeKey<Integer> OVER_PORT = AttributeKey.valueOf("overPort");
 
     public static final AttributeKey<String> REQUEST_METHOD = AttributeKey.valueOf("requestMethod");
+
+    public static final AttributeKey<String> WORK_TYPE = AttributeKey.valueOf("workType");
 }

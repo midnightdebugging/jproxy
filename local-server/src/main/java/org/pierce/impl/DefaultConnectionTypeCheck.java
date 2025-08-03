@@ -2,7 +2,6 @@ package org.pierce.impl;
 
 import io.netty.channel.EventLoop;
 import io.netty.util.concurrent.*;
-import org.apache.commons.validator.routines.InetAddressValidator;
 import org.pierce.ConnectionTypeCheck;
 import org.pierce.LocalServer;
 import org.pierce.entity.ConnectType;

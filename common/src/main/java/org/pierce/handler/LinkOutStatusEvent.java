@@ -1,7 +1,5 @@
 package org.pierce.handler;
 
-import io.netty.channel.Channel;
-
 public class LinkOutStatusEvent {
 
     LinkOutStep linkOutStep;

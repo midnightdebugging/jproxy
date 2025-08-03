@@ -39,7 +39,7 @@ java -jar  remote-server/target/local-server-${version}.jar
 # 3.如何部署
 第一步, 执行以下命令以执行 "local-server"程序.<br>
 ```shell
-java -jar -Dlocal-server.link-out.address=${target-address} -Dlocal-server.link-out.port=${target-port} local-server-${version}.jar
+java -jar -Dlocal-server.link-out.address=${target-address} -Dlocal-server.remote-socks-link-out.port=${target-port} local-server-${version}.jar
 ```
 
 * 注意: 请替换 \${target-address} 为你将要部署 "remote-server" 的地址. 同时, 也要替换 ${target-port} 为你将要部署的程序的 "remote-server" 程序监听端口.<br>

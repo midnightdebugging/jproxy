@@ -39,7 +39,7 @@ java -jar  remote-server/target/local-server-${version}.jar
 # 3.How to deploy
 step1, Use the following command to start the "local-server".<br>
 ```shell
-java -jar -Dlocal-server.link-out.address=${target-address} -Dlocal-server.link-out.port=${target-port} local-server-${version}.jar
+java -jar -Dlocal-server.link-out.address=${target-address} -Dlocal-server.remote-socks-link-out.port=${target-port} local-server-${version}.jar
 ```
 
 * Note: Please replace \${target-address} with the address where you will deploy the "remote-server". Also, replace ${target-port} with the listening port of the "remote-server" you will deploy.<br>

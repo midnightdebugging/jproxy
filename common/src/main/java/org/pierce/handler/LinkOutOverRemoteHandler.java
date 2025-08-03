@@ -11,7 +11,6 @@ import org.pierce.codec.SocksCommandCodec;
 import org.pierce.codec.SocksCommandConnectRequest;
 import org.pierce.codec.SocksCommandConnectResponse;
 import org.pierce.codec.SocksCommandResponseCode;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +24,7 @@ public class LinkOutOverRemoteHandler extends LinkOutHandler {
 
     final static String address = JproxyProperties.getProperty("local-server.link-out.address");
 
-    final static int port = Integer.parseInt(JproxyProperties.getProperty("local-server.link-out.port"));
+    final static int port = Integer.parseInt(JproxyProperties.getProperty("local-server.remote-socks-link-out.port"));
 
     public LinkOutOverRemoteHandler(Channel linkInChannel, Promise<Channel> promise, String targetAddress, int targetPort) {
         super(linkInChannel, promise, address, port);
@@ -42,7 +41,7 @@ public class LinkOutOverRemoteHandler extends LinkOutHandler {
         if (JproxyProperties.booleanVal("local-server.link-out.tls")) {
             ch.pipeline().addLast(TlsClientHandlerBuilder.getInstance().build(ch));
         }
-        ch.pipeline().addLast(new DebugHandler("link-out"));
+        ch.pipeline().addLast(new DebugHandler("link-out-via-remote-socks"));
         ch.pipeline().addLast(new SocksCommandCodec());
         ch.pipeline().addLast("LinkOutOverRemoteHandler-biz", new ChannelInboundHandlerAdapter() {
 

@@ -87,12 +87,14 @@ public class JproxyProperties {
             properties.setProperty("env", "dev");
         }
 
-        loadPropertiesByClassPath(evaluate("/application-{env}.properties"));
+        loadPropertiesByClassPath(evaluate("/application-${env}.properties"));
+
+        properties.putAll(System.getProperties());
 
         loadPropertiesByFilePath(getProperty("tls.properties"));
 
 
-        properties.putAll(System.getProperties());
+
 
         properties.setProperty("jdbc.file-dir", JproxyProperties.getProperty("jdbc.file-dir"));
         properties.setProperty("jdbc.file-name", JproxyProperties.getProperty("jdbc.file-name"));

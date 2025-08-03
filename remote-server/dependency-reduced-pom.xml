@@ -8,6 +8,11 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>remote-server</artifactId>
   <build>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+      </testResource>
+    </testResources>
     <plugins>
       <plugin>
         <artifactId>maven-shade-plugin</artifactId>
