@@ -130,7 +130,7 @@ public final class SocksServerHandler extends SimpleChannelInboundHandler<SocksM
         });
 
 
-        LocalServer.getInstance().connectionTypeCheck.check(ctx.channel().eventLoop(), host, port, promise);
+        LocalServer.getInstance().connectionTypeCheck.check(ctx.channel(), host, port, promise);
     }
 
     public void directConnect(ChannelHandlerContext ctx, String address, int port) {

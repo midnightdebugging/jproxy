@@ -7,6 +7,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.pierce.JproxyProperties;
 import org.pierce.JproxyServer;
 import org.pierce.LocalServer;
+import org.pierce.nlist.NameListCheck;
+import org.pierce.nlist.imp.FixedReturnConnectListCheck;
 import org.pierce.socks.handler.SocksServerInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,13 +19,37 @@ public final class SocksServer implements JproxyServer {
 
     private static final Logger log = LoggerFactory.getLogger(SocksServer.class);
 
+    static int portSequel = Integer.parseInt(JproxyProperties.getProperty("local-server.socks.link-in.port"));
+
+    String title = "FixedReturnConnectListCheck";
+
+    NameListCheck nameListCheck = new FixedReturnConnectListCheck();
+
+    int port;
+
+    public SocksServer() {
+        synchronized (SocksServer.class) {
+            port = portSequel;
+            portSequel++;
+        }
+    }
+
+    public SocksServer(String title, NameListCheck nameListCheck) {
+        this.title = title;
+        this.nameListCheck = nameListCheck;
+        synchronized (SocksServer.class) {
+            port = portSequel;
+            portSequel++;
+        }
+    }
+
     @Override
     public void start(EventLoopGroup eventLoopGroup) {
 
         System.setProperty("javax.net.debug", "ssl:handshake");
         LocalServer.getInstance().initialize();
 
-        int port = Integer.parseInt(JproxyProperties.getProperty("local-server.socks.link-in.port", "20084"));
+        //int port = Integer.parseInt(JproxyProperties.getProperty("local-server.socks.link-in.port"));
 
 
         ServerBootstrap serverBootstrap = new ServerBootstrap();
@@ -31,8 +57,8 @@ public final class SocksServer implements JproxyServer {
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .channel(NioServerSocketChannel.class)
-                .childHandler(new SocksServerInitializer());
-        log.info("bind {}", port);
+                .childHandler(new SocksServerInitializer(nameListCheck));
+        log.info("bind {}/:{}", title, port);
         ChannelFuture future0 = serverBootstrap.bind(port);
         future0.addListener(new ChannelFutureListener() {
             @Override

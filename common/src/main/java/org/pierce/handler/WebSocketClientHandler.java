@@ -70,7 +70,7 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        log.info("aaaaaa");
+        //log.info("aaaaaa");
         handshaker.handshake(ctx.channel());
 
     }

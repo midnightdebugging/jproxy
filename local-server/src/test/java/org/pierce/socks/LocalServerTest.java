@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.pierce.LocalServer;
 import org.pierce.nlist.NameListCheck;
+import org.pierce.nlist.imp.FixedReturnConnectListCheck;
 
 public class LocalServerTest {
 
@@ -16,7 +17,7 @@ public class LocalServerTest {
     }
     @Test
     public void test001(){
-        NameListCheck check = LocalServer.getInstance().getNameListCheck();
+        NameListCheck check = new FixedReturnConnectListCheck();
         test001(check, "google.com");
         test001(check, "xyz.example.com");
         test001(check, "google.com");

@@ -18,7 +18,7 @@ public class RemoteSocksChannelInitializer extends ChannelInitializer<SocketChan
         if (JproxyProperties.booleanVal("tls-debug")) {
             ch.pipeline().addLast(new DebugHandler("tls-link-in"));
         }
-        if (JproxyProperties.booleanVal("remote-socks.link-tls")) {
+        if (JproxyProperties.booleanVal("remote-server.link-tls")) {
             ch.pipeline().addLast(TlsServerHandlerBuilder.getInstance().build(ch));
         }
         ch.pipeline().addLast(new DebugHandler("link-in"));

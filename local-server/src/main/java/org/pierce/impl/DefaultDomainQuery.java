@@ -27,7 +27,8 @@ public class DefaultDomainQuery {
 
     private final static FailTryCheck failTryCheck = new MemeryFailTryCheck();
     static EventLoopGroup eventLoopGroup = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
-    static{
+
+    static {
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
@@ -38,10 +39,11 @@ public class DefaultDomainQuery {
             }
         });
     }
+
     public static void query(EventLoopGroup eventLoop, String domain, Promise<String> promise) {
         log.info("blackList0:{}", UtilTools.objToString(blackList0));
 
-        if (!failTryCheck.check(domain)) {
+        if (!failTryCheck.check("dns-query/" + domain)) {
             promise.tryFailure(new RuntimeException("!failTryCheck.check(domain)"));
             return;
         }
@@ -84,14 +86,14 @@ public class DefaultDomainQuery {
                     }
                     return;
                 }
-                failTryCheck.failCount(domain);
+                failTryCheck.failCount("dns-query/" + domain);
                 promise.tryFailure(future.cause());
             }
         });
         try {
             domainQuery.query(domain, jproxyPromise);
         } catch (Throwable e) {
-            failTryCheck.failCount(domain);
+            failTryCheck.failCount("dns-query" + domain);
             promise.tryFailure(e);
         }
 

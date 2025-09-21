@@ -7,6 +7,9 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.pierce.JproxyProperties;
 import org.pierce.JproxyServer;
 import org.pierce.httpproxy.handler.HttpProxyServerInitializer;
+import org.pierce.nlist.NameListCheck;
+import org.pierce.nlist.imp.FixedReturnConnectListCheck;
+import org.pierce.socks.SocksServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,18 +17,43 @@ public class HttpProxyServer implements JproxyServer {
 
     private static final Logger log = LoggerFactory.getLogger(HttpProxyServer.class);
 
+
+    static int portSequel = Integer.parseInt(JproxyProperties.getProperty("local-server.http-proxy.link-in.port"));
+
+    String title = "FixedReturnConnectListCheck";
+
+    NameListCheck nameListCheck = new FixedReturnConnectListCheck();
+
+    int port;
+
+    public HttpProxyServer() {
+        synchronized (SocksServer.class) {
+            port = portSequel;
+            portSequel++;
+        }
+    }
+
+    public HttpProxyServer(String title, NameListCheck nameListCheck) {
+        this.title = title;
+        this.nameListCheck = nameListCheck;
+        synchronized (SocksServer.class) {
+            port = portSequel;
+            portSequel++;
+        }
+    }
+
     @Override
     public void start(EventLoopGroup eventLoopGroup) {
-        int port = Integer.parseInt(JproxyProperties.getProperty("local-server.http-proxy.link-in.port"));
+        //int port = Integer.parseInt(JproxyProperties.getProperty("local-server.http-proxy.link-in.port"));
 
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(eventLoopGroup)
                 .channel(NioServerSocketChannel.class)
-                .childHandler(new HttpProxyServerInitializer())
+                .childHandler(new HttpProxyServerInitializer(nameListCheck))
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
 
-        log.info("bind {}", port);
+        log.info("bind {}/:{}", title, port);
         ChannelFuture future0 = serverBootstrap.bind(port);
         future0.addListener(new ChannelFutureListener() {
             @Override

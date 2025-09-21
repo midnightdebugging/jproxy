@@ -83,7 +83,8 @@ public class LinkOutHandler extends ChannelInboundHandlerAdapter {
         this.promise = promise;
         //this.address = address;
         //this.port = port;
-        if (!failTryCheck.check(address)) {
+
+        if (!failTryCheck.check(linkInChannel.localAddress() + "/" + address)) {
             if (linkInChannel.isActive()) {
                 linkInChannel.close();
             }
@@ -108,7 +109,7 @@ public class LinkOutHandler extends ChannelInboundHandlerAdapter {
                 @Override
                 public void operationComplete(ChannelFuture channelFuture) throws Exception {
                     if (!channelFuture.isSuccess()) {
-                        failTryCheck.failCount(address);
+                        failTryCheck.failCount(linkInChannel.localAddress() + "/" + address);
                         log.info("{} connect:{}:{} failure", UtilTools.formatChannelInfo(linkInChannel), address, port);
                         linkOutStatusEvent(linkInChannel, null, new LinkOutStatusEvent(LinkOutStep.CONNECT_FINISH, false, new Throwable(channelFuture.cause())));
                         if (linkOutChannel != null && linkOutChannel.isActive()) {

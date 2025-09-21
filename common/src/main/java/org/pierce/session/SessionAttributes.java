@@ -1,10 +1,10 @@
 package org.pierce.session;
 
 import io.netty.util.AttributeKey;
+import org.pierce.nlist.NameListCheck;
 
 public class SessionAttributes {
 
-    // 声明全局唯一的属性键（推荐使用字符串常量）
     public static final AttributeKey<String> TARGET_ADDRESS = AttributeKey.valueOf("targetAddress");
     public static final AttributeKey<Integer> TARGET_PORT = AttributeKey.valueOf("targetPort");
 
@@ -14,4 +14,6 @@ public class SessionAttributes {
     public static final AttributeKey<String> REQUEST_METHOD = AttributeKey.valueOf("requestMethod");
 
     public static final AttributeKey<String> WORK_TYPE = AttributeKey.valueOf("workType");
+
+    public static final AttributeKey<NameListCheck> NAME_LIST_CHECK = AttributeKey.valueOf("workType");
 }

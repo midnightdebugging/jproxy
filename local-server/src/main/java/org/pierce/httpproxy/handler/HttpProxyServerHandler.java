@@ -16,7 +16,7 @@ import org.pierce.entity.LocalLinkStatusEvent;
 import org.pierce.entity.LocalLinkStep;
 import org.pierce.entity.ProtocolInfo;
 import org.pierce.handler.LinkOutHandler;
-import org.pierce.handler.LinkOutOverRemoteHandler;
+import org.pierce.handler.LinkOutOverWebSocketHandler;
 import org.pierce.nlist.Directive;
 import org.pierce.session.SessionAttributes;
 import org.slf4j.Logger;
@@ -128,7 +128,7 @@ public class HttpProxyServerHandler extends SimpleChannelInboundHandler<HttpObje
         });
 
 
-        LocalServer.getInstance().connectionTypeCheck.check(ctx.channel().eventLoop(), targetAddress, targetPort, promise);
+        LocalServer.getInstance().connectionTypeCheck.check(ctx.channel(), targetAddress, targetPort, promise);
     }
 
 
@@ -174,7 +174,7 @@ public class HttpProxyServerHandler extends SimpleChannelInboundHandler<HttpObje
         LinkOutHandler handler = null;
 
         if ("CONNECT".equals(ctx.channel().attr(SessionAttributes.REQUEST_METHOD).get())) {
-            handler = new LinkOutOverRemoteHandler(ctx.channel(), promise, address, port);
+            handler = new LinkOutOverWebSocketHandler(ctx.channel(), promise, address, port);
         } else {
             handler = new HttpProxyServerLinkOutOverRemoteSocksHandler(ctx.channel(), promise, address, port);
         }
