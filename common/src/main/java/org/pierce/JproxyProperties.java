@@ -87,9 +87,10 @@ public class JproxyProperties {
             properties.setProperty("env", "dev");
         }
 
+        properties.putAll(System.getProperties());
+        
         loadPropertiesByClassPath(evaluate("/application-${env}.properties"));
 
-        properties.putAll(System.getProperties());
 
         loadPropertiesByFilePath(getProperty("tls.properties"));
 
