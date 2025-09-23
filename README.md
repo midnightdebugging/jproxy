@@ -77,8 +77,21 @@ mkdir "$HOME/.jproxy" && cd "$HOME/.jproxy" && tar -xvf /path/to/jproxy-config.t
 ```shell
 java -jar  remote-server/target/local-server-${version}.jar
 ```
+# 4.如何使用?
+代理监听端口,可以在这个文件(`local-server/src/main/resources/application.properties`)配置或者在启动时指定JVM参数(`-Dxx=yy`)。默认的监听类型和端口如下<br>
 
-# 4.如何配置 GFWList?
+| 代理方式   | 所监听的端口 | 偏移量                                         | 功能                                                 | 备注                                                            |
+|--------|--------|---------------------------------------------|----------------------------------------------------|---------------------------------------------------------------|
+| Socks5 | 20080  | `${local-server.socks.link-in.port}`+0      | 完全将流量接出到`remote-server`                            | 可通过配置`local-server.socks.link-in.port`指定监听端口                  |
+| Socks5 | 20081  | `${local-server.socks.link-in.port}`+1      | 读取`NameList`表，根据名单规则判断流量是否接出到`remote-server`       | 数据库位置在`$HOME/.jproxy`中,参见`NameList`表                          |
+| Socks5 | 20082  | `${local-server.socks.link-in.port}` +2     | 读取`name-list.txt`文件，根据名单规则判断流量是否接出到`remote-server` | 文件在`local-server/src/main/resources/name-list.txt`中           |
+| Socks5 | 20083  | `${local-server.socks.link-in.port}`+3      | 读取` GFWList`表，根据名单规则判断流量是否接出到`remote-server`       | GFWList 项目详情，参见 [GFWList](https://github.com/gfwlist/gfwlist) |
+| HTTP   | 21080  | `${local-server.http-proxy.link-in.port}`+0 | 完全将流量接出到`remote-server`                            | 可通过配置`local-server.http-proxy.link-in.port`指定监听端口             |
+| HTTP   | 21081  | `${local-server.http-proxy.link-in.port}`+1 | 读取`NameList`表，根据名单规则判断流量是否接出到`remote-server`       | 数据库位置在`$HOME/.jproxy`中,参见`NameList`表                          |
+| HTTP   | 21082  | `${local-server.http-proxy.link-in.port}`+2 | 读取`name-list.txt`文件，根据名单规则判断流量是否接出到`remote-server` | 文件在`local-server/src/main/resources/name-list.txt`中           |
+| HTTP   | 21083  | `${local-server.http-proxy.link-in.port}`+3 | 读取` GFWList`表，根据名单规则判断流量是否接出到`remote-server`       | GFWList 项目详情，参见 [GFWList](https://github.com/gfwlist/gfwlist) |
+
+# 5.如何配置 GFWList?
 GFWList 项目详情，参见 [GFWList](https://github.com/gfwlist/gfwlist).<br>
 
 当 'local-server' 程序启动时, 程序将读取这个文件 `"$HOME/.jproxy/${env}/gfw-list.txt` , 因此，我们需要把文件更新到这个路径.<br>
@@ -93,6 +106,7 @@ env=dev
 curl https://gitlab.com/gfwlist/gfwlist/raw/master/gfwlist.txt > "$HOME/.jproxy/${env}/gfw-list.txt"
 
 ```
+经过以上配置需要重启 'local-server' 以使配置生效。
 
 
 
