@@ -28,7 +28,7 @@ public class JproxyDomainQueryTest {
         });
 
         String[] hostNameArr = new String[]{
-                "creative.mnaspm.com", "creative.myavlive.com", "creative.niscprts.com", "creative.xlivrdr.com", "creative.zwhitelabel.com", "creativecdn.com", "csi.gstatic.com", "css.yhdmtu.xyz", "cstat.cdn-apple.com", "cstm.baidu.com", "csycdn.flv.wxqcloud.qq.com", "cube.meituan.com", "cube.weixinbridge.com", "currency.prebid.org", "d.myani.org", "d.qchannel03.cn", "d1--cn-gotcha204-1.bilivideo.com", "d1--cn-gotcha204-3.bilivideo.com", "d1--cn-gotcha204-4.bilivideo.com", "danmu.yhdmjx.com", "das.svc.litv.tv", "dash.cloudflare.com", "data-api.esign.cn", "data.ab.qq.com", "data.bilibili.com", "data.sec.miui.com", "dataflow.biliapi.com", "detectportal.firefox.com", "device-config.pcms.apple.com", "dfpgw.paas.cmbchina.com", "dfzximg02.dftoutiao.com", "diffusedpassionquaking.com", "dig.bdurl.net", "dis.criteo.com", "disp-qryapi.3g.qq.com", "dispatcher.is.autonavi.com"
+                "github.com"
         };
         EventExecutor executor = ImmediateEventExecutor.INSTANCE;
         for (String hostName : hostNameArr) {
