@@ -7,7 +7,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.Promise;
 import org.pierce.FailTryCheck;
 import org.pierce.UtilTools;
-import org.pierce.imp.MemeryFailTryCheck;
+import org.pierce.imp.MemoryTimeOutFailTryCheck;
 import org.pierce.session.SessionAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ public class LinkOutHandler extends ChannelInboundHandlerAdapter {
 
     private final static Logger log = LoggerFactory.getLogger(LinkOutHandler.class);
 
-    private final static FailTryCheck failTryCheck = new MemeryFailTryCheck();
+    private final static FailTryCheck failTryCheck = new MemoryTimeOutFailTryCheck();
     final Channel linkInChannel;
     //private final String address;
     //private final int port;

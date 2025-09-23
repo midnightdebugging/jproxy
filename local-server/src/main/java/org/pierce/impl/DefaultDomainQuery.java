@@ -6,7 +6,7 @@ import io.netty.channel.nio.NioIoHandler;
 import io.netty.util.concurrent.*;
 import org.apache.ibatis.session.SqlSession;
 import org.pierce.*;
-import org.pierce.imp.MemeryFailTryCheck;
+import org.pierce.imp.MemoryTimeOutFailTryCheck;
 import org.pierce.mybatis.mapper.HostName2AddressMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,7 @@ public class DefaultDomainQuery {
 
     private static final HashMap<String, Integer> blackList0 = new HashMap<>();
 
-    private final static FailTryCheck failTryCheck = new MemeryFailTryCheck();
+    private final static FailTryCheck failTryCheck = new MemoryTimeOutFailTryCheck();
     static EventLoopGroup eventLoopGroup = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
 
     static {
