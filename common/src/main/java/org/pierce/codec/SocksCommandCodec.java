@@ -23,7 +23,7 @@ import java.util.List;
  */
 public class SocksCommandCodec extends ByteToMessageCodec<SocksCommand> {
 
-    final static List<Class<?>> socksCommandList = new ArrayList<>();
+    public final static List<Class<?>> socksCommandList = new ArrayList<>();
 
     final static Logger log = LoggerFactory.getLogger(SocksCommandCodec.class);
 

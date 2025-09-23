@@ -6,7 +6,7 @@ import io.netty.channel.nio.NioIoHandler;
 import io.netty.util.concurrent.*;
 import org.apache.ibatis.session.SqlSession;
 import org.pierce.*;
-import org.pierce.imp.MemeryFailTryCheck;
+import org.pierce.imp.MemoryTimeOutFailTryCheck;
 import org.pierce.mybatis.mapper.HostName2AddressMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,15 +19,16 @@ public class DefaultDomainQuery {
 
     public final static String remoteAddress = JproxyProperties.getProperty("local-server.link-out.address");
 
-    public final static int remotePort = Integer.parseInt(JproxyProperties.getProperty("local-server.link-out.port"));
+    public final static int remotePort = Integer.parseInt(JproxyProperties.getProperty("local-server.remote-socks-link-out.port"));
 
     private static final Logger log = LoggerFactory.getLogger(DefaultDomainQuery.class);
 
     private static final HashMap<String, Integer> blackList0 = new HashMap<>();
 
-    private final static FailTryCheck failTryCheck = new MemeryFailTryCheck();
+    private final static FailTryCheck failTryCheck = new MemoryTimeOutFailTryCheck();
     static EventLoopGroup eventLoopGroup = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
-    static{
+
+    static {
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
@@ -38,10 +39,11 @@ public class DefaultDomainQuery {
             }
         });
     }
+
     public static void query(EventLoopGroup eventLoop, String domain, Promise<String> promise) {
         log.info("blackList0:{}", UtilTools.objToString(blackList0));
 
-        if (!failTryCheck.check(domain)) {
+        if (!failTryCheck.check("dns-query/" + domain)) {
             promise.tryFailure(new RuntimeException("!failTryCheck.check(domain)"));
             return;
         }
@@ -84,14 +86,14 @@ public class DefaultDomainQuery {
                     }
                     return;
                 }
-                failTryCheck.failCount(domain);
+                failTryCheck.failCount("dns-query/" + domain);
                 promise.tryFailure(future.cause());
             }
         });
         try {
             domainQuery.query(domain, jproxyPromise);
         } catch (Throwable e) {
-            failTryCheck.failCount(domain);
+            failTryCheck.failCount("dns-query" + domain);
             promise.tryFailure(e);
         }
 

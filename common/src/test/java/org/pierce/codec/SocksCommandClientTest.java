@@ -8,7 +8,6 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.pierce.JproxyProperties;
 import org.pierce.handler.DebugHandler;
-
 import org.pierce.handler.TlsClientHandlerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

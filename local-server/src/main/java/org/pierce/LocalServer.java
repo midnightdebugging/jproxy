@@ -4,16 +4,15 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.MultiThreadIoEventLoopGroup;
 import io.netty.channel.nio.NioIoHandler;
 import org.apache.ibatis.session.SqlSession;
+import org.pierce.httpproxy.HttpProxyServer;
 import org.pierce.imp.DefaultSelector;
 import org.pierce.impl.DefaultConnectionTypeCheck;
-import org.pierce.lhttpproxy.HttpProxyServer;
-import org.pierce.lsocks.SocksServer;
 import org.pierce.mybatis.entity.HostName2Address;
 import org.pierce.mybatis.mapper.HostName2AddressMapper;
-import org.pierce.nlist.NameListCheck;
 import org.pierce.nlist.imp.DataBaseNameListCheck;
-import org.pierce.nlist.imp.FixedReturnConnectListCheck;
 import org.pierce.nlist.imp.GFWNameListCheck;
+import org.pierce.nlist.imp.TextNameListCheck;
+import org.pierce.socks.SocksServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +25,7 @@ public class LocalServer {
 
     private static final Logger log = LoggerFactory.getLogger(LocalServer.class);
 
-    private NameListCheck nameListCheck;
+    //private NameListCheck nameListCheck;
 
     public ConnectionTypeCheck connectionTypeCheck;
 
@@ -45,22 +44,6 @@ public class LocalServer {
 
     public void initialize() {
         Jproxy.getInstance().initialize();
-        if ("fixed".equals(JproxyProperties.getProperty("connect-debug"))) {
-            nameListCheck = new FixedReturnConnectListCheck();
-        } else {
-            /*nameListCheck = new DataBaseNameListCheck();*/
-            nameListCheck = new GFWNameListCheck() {
-                {
-                    try {
-                        loadConfigure();
-                    } catch (IOException e) {
-                        log.error("loadConfigure,error", e);
-                    }
-                }
-            };
-
-        }
-
         connectionTypeCheck = new DefaultConnectionTypeCheck();
     }
 
@@ -84,9 +67,6 @@ public class LocalServer {
         }
     }
 
-    public NameListCheck getNameListCheck() {
-        return nameListCheck;
-    }
 
     public Selector<String> getStringSelector() {
         return stringSelector;
@@ -101,11 +81,64 @@ public class LocalServer {
                 log.info("eventLoopGroup.shutdownGracefully()");
             }
         });
+        //+0.FixedReturnConnectListCheck
         JproxyServer socksServer = new SocksServer();
         socksServer.start(eventLoopGroup);
 
+        //+1.DataBaseNameListCheck
+        socksServer = new SocksServer("DataBaseNameListCheck", new DataBaseNameListCheck());
+        socksServer.start(eventLoopGroup);
+
+        //+2.TextNameListCheck
+        socksServer = new SocksServer("TextNameListCheck", new TextNameListCheck() {
+            {
+                loadByInputStream();
+            }
+
+        });
+        socksServer.start(eventLoopGroup);
+
+        //+3.GFWNameListCheck
+        socksServer = new SocksServer("GFWNameListCheck", new GFWNameListCheck() {
+            {
+                try {
+                    loadConfigure();
+                } catch (IOException e) {
+                    log.error("loadConfigure,error", e);
+                }
+            }
+        });
+        socksServer.start(eventLoopGroup);
+
+        ////////// http proxy
+        //+0.FixedReturnConnectListCheck
         JproxyServer httpProxyServer = new HttpProxyServer();
         httpProxyServer.start(eventLoopGroup);
 
+
+        //+1.DataBaseNameListCheck
+        httpProxyServer = new HttpProxyServer("DataBaseNameListCheck", new DataBaseNameListCheck());
+        httpProxyServer.start(eventLoopGroup);
+
+        //+2.TextNameListCheck
+        httpProxyServer = new HttpProxyServer("TextNameListCheck", new TextNameListCheck() {
+            {
+                loadByInputStream();
+            }
+
+        });
+        httpProxyServer.start(eventLoopGroup);
+
+        //+3.GFWNameListCheck
+        httpProxyServer = new HttpProxyServer("GFWNameListCheck", new GFWNameListCheck() {
+            {
+                try {
+                    loadConfigure();
+                } catch (IOException e) {
+                    log.error("loadConfigure,error", e);
+                }
+            }
+        });
+        httpProxyServer.start(eventLoopGroup);
     }
 }

@@ -6,6 +6,7 @@ public interface FailTryCheck {
 
     boolean check(String input);
 
+    void clear();
 
 
 }

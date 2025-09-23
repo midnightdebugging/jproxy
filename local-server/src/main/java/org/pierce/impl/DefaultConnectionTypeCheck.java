@@ -1,29 +1,33 @@
 package org.pierce.impl;
 
+import io.netty.channel.Channel;
 import io.netty.channel.EventLoop;
 import io.netty.util.concurrent.*;
-import org.apache.commons.validator.routines.InetAddressValidator;
 import org.pierce.ConnectionTypeCheck;
-import org.pierce.LocalServer;
 import org.pierce.entity.ConnectType;
 import org.pierce.nlist.Directive;
 import org.pierce.nlist.NameListCheck;
+import org.pierce.session.SessionAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class DefaultConnectionTypeCheck implements ConnectionTypeCheck {
 
 
     private static final Logger log = LoggerFactory.getLogger(DefaultConnectionTypeCheck.class);
 
-    final static NameListCheck check = LocalServer.getInstance().getNameListCheck();
+    //final static NameListCheck check = LocalServer.getInstance().getNameListCheck();
 
+    final static Map<String, NameListCheck> checkMap = new HashMap<String, NameListCheck>();
 
     @Override
-    public void check(EventLoop eventLoop, String address, int targetPort, Promise<ConnectType> promise) {
+    public void check(Channel channel, String address, int targetPort, Promise<ConnectType> promise) {
 
-
-        Directive directive = check.check(address, targetPort);
+        EventLoop eventLoop = channel.eventLoop();
+        Directive directive = channel.attr(SessionAttributes.NAME_LIST_CHECK).get().check(address, targetPort);
 
         log.info("{} {}", directive, address);
         if (directive == Directive.DISALLOW_CONNECT) {
@@ -43,7 +47,7 @@ public class DefaultConnectionTypeCheck implements ConnectionTypeCheck {
                 public void operationComplete(Future<? super String> future) throws Exception {
                     if (future.isSuccess()) {
                         String newAddress = String.valueOf(future.getNow());
-                        check(eventLoop, newAddress, targetPort, promise);
+                        check(channel, newAddress, targetPort, promise);
                         return;
                     }
                     promise.setFailure(new RuntimeException(String.format("domain query %s fail", address)));

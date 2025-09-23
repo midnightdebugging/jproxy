@@ -17,6 +17,10 @@
             <artifactId>common</artifactId>
             <version>${version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-http</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -53,5 +57,11 @@
                 </executions>
             </plugin>
         </plugins>
+        <testResources>
+            <!-- 默认测试资源目录 -->
+            <testResource>
+                <directory>src/test/resources</directory>
+            </testResource>
+        </testResources>
     </build>
 </project>

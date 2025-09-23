@@ -7,11 +7,12 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.Promise;
 import org.pierce.FailTryCheck;
 import org.pierce.UtilTools;
-import org.pierce.imp.MemeryFailTryCheck;
+import org.pierce.imp.MemoryTimeOutFailTryCheck;
 import org.pierce.session.SessionAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -20,17 +21,20 @@ public class LinkOutHandler extends ChannelInboundHandlerAdapter {
 
     private final static Logger log = LoggerFactory.getLogger(LinkOutHandler.class);
 
-    private final static FailTryCheck failTryCheck = new MemeryFailTryCheck();
+    private final static FailTryCheck failTryCheck = new MemoryTimeOutFailTryCheck();
     final Channel linkInChannel;
-    private final String address;
-    private final int port;
+    //private final String address;
+    //private final int port;
     protected Channel linkOutChannel;
     final Promise<Channel> promise;
 
     Queue<Object> queue = new LinkedList<>();
 
+    String targetAddress;
+    int targetPort;
 
-    protected void initChannel(SocketChannel ch, Promise<Channel> promise) {
+
+    protected void initChannel(SocketChannel ch, Promise<Channel> promise) throws URISyntaxException {
         ch.pipeline().addLast(new DebugHandler("link-out"));
         ch.pipeline().addLast("LinkOutHandler-handler", new ChannelInboundHandlerAdapter() {
             @Override
@@ -69,11 +73,18 @@ public class LinkOutHandler extends ChannelInboundHandlerAdapter {
     }
 
     public LinkOutHandler(Channel linkInChannel, Promise<Channel> promise, String address, int port) {
+        this(linkInChannel, promise, address, port, null, 0);
+    }
+
+    public LinkOutHandler(Channel linkInChannel, Promise<Channel> promise, String address, int port, String targetAddress, int targetPort) {
+        this.targetAddress = targetAddress;
+        this.targetPort = targetPort;
         this.linkInChannel = linkInChannel;
         this.promise = promise;
-        this.address = address;
-        this.port = port;
-        if (!failTryCheck.check(address)) {
+        //this.address = address;
+        //this.port = port;
+
+        if (!failTryCheck.check(linkInChannel.localAddress() + "/" + address)) {
             if (linkInChannel.isActive()) {
                 linkInChannel.close();
             }
@@ -98,7 +109,7 @@ public class LinkOutHandler extends ChannelInboundHandlerAdapter {
                 @Override
                 public void operationComplete(ChannelFuture channelFuture) throws Exception {
                     if (!channelFuture.isSuccess()) {
-                        failTryCheck.failCount(address);
+                        failTryCheck.failCount(linkInChannel.localAddress() + "/" + address);
                         log.info("{} connect:{}:{} failure", UtilTools.formatChannelInfo(linkInChannel), address, port);
                         linkOutStatusEvent(linkInChannel, null, new LinkOutStatusEvent(LinkOutStep.CONNECT_FINISH, false, new Throwable(channelFuture.cause())));
                         if (linkOutChannel != null && linkOutChannel.isActive()) {
@@ -162,6 +173,10 @@ public class LinkOutHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
+    public void linkOutStatusEvent(LinkOutStatusEvent linkOutStatusEvent) {
+        linkOutStatusEvent(this.linkInChannel, this.linkOutChannel, linkOutStatusEvent);
+    }
+
     public void linkOutStatusEvent(Channel linkIn, Channel linkOut, LinkOutStatusEvent linkOutStatusEvent) {
 
         if (!linkOutStatusEvent.isSuccess()) {
@@ -193,5 +208,14 @@ public class LinkOutHandler extends ChannelInboundHandlerAdapter {
         log.debug("{} {}", UtilTools.formatChannelInfo(linkOutChannel), msg.getClass());
         //log.info("{}", msg.getClass());
         linkInChannel.writeAndFlush(msg);
+    }
+
+
+    public Channel getLinkInChannel() {
+        return linkInChannel;
+    }
+
+    public Channel getLinkOutChannel() {
+        return linkOutChannel;
     }
 }

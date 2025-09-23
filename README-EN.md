@@ -39,7 +39,7 @@ java -jar  remote-server/target/local-server-${version}.jar
 # 3.How to deploy
 step1, Use the following command to start the "local-server".<br>
 ```shell
-java -jar -Dlocal-server.link-out.address=${target-address} -Dlocal-server.link-out.port=${target-port} local-server-${version}.jar
+java -jar -Dlocal-server.link-out.address=${target-address} -Dlocal-server.remote-socks-link-out.port=${target-port} local-server-${version}.jar
 ```
 
 * Note: Please replace \${target-address} with the address where you will deploy the "remote-server". Also, replace ${target-port} with the listening port of the "remote-server" you will deploy.<br>
@@ -77,9 +77,23 @@ step4, Execute the following command to run "remote-server":<br>
 ```shell
 java -jar  remote-server/target/local-server-${version}.jar
 ```
+# 4. How to use?
 
-# 4.How to deploy GFWList?
-GFWLis tProject see [GFWList](https://github.com/gfwlist/gfwlist).<br>
+The proxy listening port can be configured in this file (`local-server/src/main/resources/application.properties`) or specified with a JVM parameter (`-Dxx=yy`) at startup. The default listening type and port are as follows.
+
+| Proxy type | Listening port | Offset                                      | Function                                                                                                                | Remarks                                                                                                         |
+|------------|----------------|---------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
+| Socks5     | 20080          | `${local-server.socks.link-in.port}`+0      | Completely redirect the network traffic to the `remote-server`.                                                         | You can specify the listening port by configuring `local-server.socks.link-in.port`.                            |
+| Socks5     | 20081          | `${local-server.socks.link-in.port}`+1      | Read the table `NameList`，Determine whether the traffic is routed to `remote-server` according to the list rules.       | The database location is in `$HOME/.jproxy`, and the configuration method can be found in the `NameList` table. |
+| Socks5     | 20082          | `${local-server.socks.link-in.port}`+2      | Read the file `name-list.txt`文件，Determine whether the traffic is routed to `remote-server` according to the list rules. | The file is in `local-server/src/main/resources/name-list.txt`.                                                 |
+| Socks5     | 20083          | `${local-server.socks.link-in.port}`+3      | Read the table ` GFWList`，Determine whether the traffic is routed to `remote-server` according to the list rules.       | GFWList Project see [GFWList](https://github.com/gfwlist/gfwlist).                                              |
+| HTTP       | 21080          | `${local-server.http-proxy.link-in.port}`+0 | Completely redirect the network traffic to the `remote-server`.                                                         | You can specify the listening port by configuring `local-server.socks.link-in.port`.                            |
+| HTTP       | 21081          | `${local-server.http-proxy.link-in.port}`+1 | Read the table `NameList`，Determine whether the traffic is routed to `remote-server` according to the list rules.       | The database location is in `$HOME/.jproxy`, and the configuration method can be found in the `NameList` table. |
+| HTTP       | 21082          | `${local-server.http-proxy.link-in.port}`+2 | Read the file `name-list.txt`文件，Determine whether the traffic is routed to `remote-server` according to the list rules. | The file is in `local-server/src/main/resources/name-list.txt`.                                                 |
+| HTTP       | 21083          | `${local-server.http-proxy.link-in.port}`+3 | Read the table ` GFWList`，Determine whether the traffic is routed to `remote-server` according to the list rules.       | GFWList Project see [GFWList](https://github.com/gfwlist/gfwlist).                                              |
+
+# 5.How to deploy GFWList?
+GFWList Project see [GFWList](https://github.com/gfwlist/gfwlist).<br>
 
 When the 'local-server' starts, it will read `"$HOME/.jproxy/${env}/gfw-list.txt`, so we need to update the configuration file to the following file.<br>
 * Note: The env variable is configured in "src/main/resources/application.properties". When "local-server" starts, it will print to "/tmp/logs/local-server.log".<br>
@@ -93,7 +107,7 @@ env=dev
 curl https://gitlab.com/gfwlist/gfwlist/raw/master/gfwlist.txt > "$HOME/.jproxy/${env}/gfw-list.txt"
 
 ```
-
+After the above configuration, it is necessary to restart 'local-server' for the configuration to take effect.
 
 
 

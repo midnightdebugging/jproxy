@@ -5,7 +5,8 @@ import io.netty.channel.MultiThreadIoEventLoopGroup;
 import io.netty.channel.nio.NioIoHandler;
 import org.pierce.nlist.NameListCheck;
 import org.pierce.nlist.imp.TextNameListCheck;
-import org.pierce.rsocks.RemoteSocks;
+import org.pierce.socks.RemoteSocks;
+import org.pierce.websocket.RemoteWebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +15,7 @@ public class RemoteServer {
 
     private static final Logger log = LoggerFactory.getLogger(RemoteServer.class);
 
-    private final static NameListCheck nameListCheck = new TextNameListCheck(){
+    private final static NameListCheck nameListCheck = new TextNameListCheck() {
         {
             super.loadByInputStream();
         }
@@ -36,6 +37,8 @@ public class RemoteServer {
         JproxyServer remoteSocks = new RemoteSocks();
         remoteSocks.start(eventLoopGroup);
 
+        JproxyServer remoteWebSocket = new RemoteWebSocket();
+        remoteWebSocket.start(eventLoopGroup);
 
     }
 }

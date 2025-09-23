@@ -31,6 +31,7 @@ public class DebugHandler extends ChannelDuplexHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        logObj(ctx, "入站数据", msg);
         if (msg instanceof ByteBuf) {
             logBytes(ctx, "入站数据", (ByteBuf) msg);
         }
@@ -39,6 +40,7 @@ public class DebugHandler extends ChannelDuplexHandler {
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+        logObj(ctx, "出站数据", msg);
         if (msg instanceof ByteBuf) {
             // 复制ByteBuf并记录日志，不影响原数据
             logBytes(ctx, "出站数据", (ByteBuf) msg);
@@ -46,11 +48,11 @@ public class DebugHandler extends ChannelDuplexHandler {
         super.write(ctx, msg, promise); // 传递给后续处理器
     }
 
-    private void logBytes(ChannelHandlerContext ctx, String direction, ByteBuf buf) {
+    private void logObj(ChannelHandlerContext ctx, String direction, Object object) {
         if (!JproxyProperties.booleanVal("debug")) {
             return;
         }
-        if (false) {
+        {
             StringBuilder sb = new StringBuilder();
             ChannelPipeline pipeline = ctx.pipeline();
             sb.append("===== Pipeline Structure =====\n");
@@ -61,6 +63,14 @@ public class DebugHandler extends ChannelDuplexHandler {
             }
             log.info(sb.toString());
         }
+        log.info("{} {} {} {},{}", UtilTools.formatChannelInfo(ctx), title, direction, object.getClass(), String.valueOf(object));
+    }
+
+    private void logBytes(ChannelHandlerContext ctx, String direction, ByteBuf buf) {
+        if (!JproxyProperties.booleanVal("debug")) {
+            return;
+        }
+
 
         // 创建副本避免影响原缓冲区的读写索引
         ByteBuf copy = buf.copy();
