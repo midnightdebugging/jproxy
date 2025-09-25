@@ -23,5 +23,6 @@
       </option>
       <option name="myCustomValuesEnabled" value="true" />
     </inspection_tool>
+    <inspection_tool class="UnusedProperty" enabled="true" level="INFORMATION" enabled_by_default="true" />
   </profile>
 </component>
