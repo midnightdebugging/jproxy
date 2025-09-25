@@ -18,7 +18,7 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!--<netty.version>4.2.2.Final</netty.version>-->
+        <!--<netty.version>4.2.5.Final</netty.version>-->
         <!--<netty.version>4.1.118.Final</netty.version>-->
         <netty.version>4.2.2.Final</netty.version>
         <jproxy.version>1.0-SNAPSHOT</jproxy.version>
