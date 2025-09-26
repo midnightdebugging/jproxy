@@ -77,22 +77,11 @@ public class GFWRuleEntity {
         this.patternStr = patternStr;
     }
 
-    public Directive check(String address, int port) {
+    public Directive check(String address, int port, List<String> urlLike) {
 
-        List<String> stringList = new ArrayList<>();
-        stringList.add(address);
-        stringList.add(String.format("%s:%d", address, port));
-        if (port == 443) {
-            stringList.add(String.format("https://%s/aa/bb", address));
-        } else if (port == 80) {
-            stringList.add(String.format("http://%s/aa/bb", address));
-        } else {
-            stringList.add(String.format("https://%s:%d/aa/bb", address, port));
-            stringList.add(String.format("http://%s:%d/aa/bb", address, port));
-        }
         boolean patterTest = false;
         if (pattern != null) {
-            for (String str : stringList) {
+            for (String str : urlLike) {
                 if (pattern.matcher(str).find()) {
                     patterTest = true;
                 }
@@ -109,7 +98,12 @@ public class GFWRuleEntity {
             // like |
             case URL_MATCH:
 
-
+/*                if (protocolInfo.getHostAddress().contains("vllcs.org")) {
+                    String tmp = protocolInfo.getHostAddress();
+                    System.out.println(protocolInfo.getHostAddress());
+                    System.out.println(address);
+                    System.out.println(protocolInfo.getHostAddress().equals(address));
+                }*/
                 if (protocolInfo.getHostAddress().equals(address) || patterTest) {
                     if (protocolInfo.getPort() == port) {
                         return exclude ? Directive.DIRECT_CONNECT : Directive.FULL_CONNECT;
@@ -133,11 +127,6 @@ public class GFWRuleEntity {
                 break;
         }
         return Directive.MISS;
-
-    }
-
-    public Directive check(String address) {
-        return check(address, -1);
 
     }
 }

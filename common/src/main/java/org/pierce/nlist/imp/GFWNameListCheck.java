@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,7 +55,7 @@ public class GFWNameListCheck extends DefaultNameListCheck implements NameListCh
             while (scanner.hasNext()) {
                 String line = scanner.nextLine();
 
-                // log.info("line:{}", line);
+                //log.info("line:{}", line);
 
                 if (firstLine) {
                     firstLine = false;
@@ -66,81 +68,10 @@ public class GFWNameListCheck extends DefaultNameListCheck implements NameListCh
                 if (line.isEmpty()) {
                     continue;
                 }
-                GFWRuleEntity gfwRuleEntity = new GFWRuleEntity();
-                gfwRuleEntity.setOriData(line);
-                gfwRuleEntity.setExclude(false);
-                if (line.startsWith("@@")) {
-                    line = line.substring(2);
-                    gfwRuleEntity.setExclude(true);
-                }
 
-                if (line.startsWith("||")) {
-                    line = line.substring(2);
+                GFWRuleEntity gfwRuleEntity = parserGFWRuleEntity(line);
+                gfwRuleEntities.add(gfwRuleEntity);
 
-                    ProtocolInfo protocolInfo = UtilTools.parseProtocolInfo(line);
-                    if (protocolInfo.getHostAddress().contains("*")) {
-                        String tmpStr = protocolInfo.getHostAddress();
-                        tmpStr = tmpStr.replace(".", "\\.");
-                        tmpStr = tmpStr.replace("*", ".*");
-
-                        gfwRuleEntity.setPatternStr("^" + tmpStr + "$");
-                        //同时启用正则表达式校验
-                        gfwRuleEntity.setPattern(Pattern.compile(gfwRuleEntity.getPatternStr()));
-                    }
-                    gfwRuleEntity.setData(protocolInfo.getHostAddress());
-                    gfwRuleEntity.setGfwDirective(GFWDirective.HOST_MATCH);
-
-                    gfwRuleEntities.add(gfwRuleEntity);
-
-                    //log.info("{} ==>{}", gfwRuleEntity.getOriData(), UtilTools.objToString(gfwRuleEntity));
-                    continue;
-                }
-
-                if (line.startsWith("|")) {
-                    line = line.substring(1);
-
-                    gfwRuleEntity.setGfwDirective(GFWDirective.URL_MATCH);
-                    ProtocolInfo protocolInfo = UtilTools.parseProtocolInfo(line);
-                    gfwRuleEntity.setProtocolInfo(protocolInfo);
-                    if (protocolInfo.getHostAddress().contains("*")) {
-                        String tmpStr = protocolInfo.getHostAddress();
-                        tmpStr = tmpStr.replace(".", "\\.");
-                        tmpStr = tmpStr.replace("*", ".*");
-
-                        gfwRuleEntity.setPatternStr("^" + tmpStr + "$");
-                        gfwRuleEntity.setPattern(Pattern.compile(gfwRuleEntity.getPatternStr()));
-                    }
-                    gfwRuleEntities.add(gfwRuleEntity);
-                    //log.info("{} ==>{}", gfwRuleEntity.getOriData(), UtilTools.objToString(gfwRuleEntity));
-                    continue;
-
-                }
-
-                if (line.startsWith("/")) {
-                    //line = line.replace("/^https?:\\/\\/", "/^");
-                    line = line.substring(1, line.length() - 1);
-                    gfwRuleEntity.setGfwDirective(GFWDirective.REG_MATCH);
-                    gfwRuleEntity.setPattern(Pattern.compile(line));
-                    gfwRuleEntity.setPatternStr(line);
-                    gfwRuleEntities.add(gfwRuleEntity);
-                    //log.info("{} ==>{}", gfwRuleEntity.getOriData(), UtilTools.objToString(gfwRuleEntity));
-                    continue;
-                }
-                if (line.startsWith(".")) {
-                    gfwRuleEntity.setGfwDirective(GFWDirective.HOST_END_WIDTH);
-                    gfwRuleEntity.setData(line);
-                    gfwRuleEntities.add(gfwRuleEntity);
-                    //log.info("{} ==>{}", gfwRuleEntity.getOriData(), UtilTools.objToString(gfwRuleEntity));
-                    continue;
-                }
-                if (Pattern.compile("^\\d").matcher(line).find() || Pattern.compile("^\\w").matcher(line).find()) {
-                    gfwRuleEntity.setGfwDirective(GFWDirective.HOST_MATCH);
-                    gfwRuleEntity.setData(line);
-                    gfwRuleEntities.add(gfwRuleEntity);
-                    //log.info("{} ==>{}", gfwRuleEntity.getOriData(), UtilTools.objToString(gfwRuleEntity));
-                    continue;
-                }
-                throw new RuntimeException("Unresolved string:" + line);
             }
         }
         GFWRuleEntity[] gfwRuleEntityArr = new GFWRuleEntity[gfwRuleEntities.size()];
@@ -163,29 +94,124 @@ public class GFWNameListCheck extends DefaultNameListCheck implements NameListCh
         gfwRuleEntities = Arrays.asList(gfwRuleEntityArr);
 
         for (GFWRuleEntity gfwRuleEntity : gfwRuleEntities) {
-            if (gfwRuleEntity.getPattern() != null) {
-                log.info("{} => {}", gfwRuleEntity.getOriData(), UtilTools.objToString(gfwRuleEntity));
+            if (gfwRuleEntity.getGfwDirective() == GFWDirective.HOST_MATCH || gfwRuleEntity.getGfwDirective() == GFWDirective.HOST_END_WIDTH) {
+                Pattern p = Pattern.compile("^[a-zA-Z0-9.\\-]+$");
+                if (!p.matcher(gfwRuleEntity.getData()).find()) {
+                    //log.info("{} => {}", gfwRuleEntity.getOriData(), UtilTools.objToString(gfwRuleEntity));
+                    throw new RuntimeException("!p.matcher(gfwRuleEntity.getData()).find():" + gfwRuleEntity.getData());
+                }
             }
-
+            //log.info("{} => {}", gfwRuleEntity.getOriData(), UtilTools.objToString(gfwRuleEntity));
         }
     }
 
 
+    public GFWRuleEntity parserGFWRuleEntity(String line) {
+        GFWRuleEntity gfwRuleEntity = new GFWRuleEntity();
+        gfwRuleEntity.setOriData(line);
+        parserGFWRuleEntity(line, gfwRuleEntity);
+        return gfwRuleEntity;
+    }
+
+    public void parserGFWRuleEntity(String line, GFWRuleEntity gfwRuleEntity) {
+        if (line.startsWith("@@")) {
+            line = line.substring(2);
+            gfwRuleEntity.setExclude(true);
+            //递归调用
+            parserGFWRuleEntity(line, gfwRuleEntity);
+            return;
+        }
+        if (line.startsWith("||")) {
+            line = line.substring(2);
+
+            ProtocolInfo protocolInfo = UtilTools.parseProtocolInfo(line);
+            gfwRuleEntity.setGfwDirective(GFWDirective.HOST_MATCH);
+            gfwRuleEntity.setData(protocolInfo.getHostAddress());
+            gfwRuleEntity.setProtocolInfo(protocolInfo);
+            wildcardCheck(gfwRuleEntity);
+            return;
+        }
+
+        if (line.startsWith("|")) {
+            line = line.substring(1);
+            line = URLDecoder.decode(line, StandardCharsets.UTF_8);
+            gfwRuleEntity.setGfwDirective(GFWDirective.URL_MATCH);
+            ProtocolInfo protocolInfo = UtilTools.parseProtocolInfo(line);
+            gfwRuleEntity.setProtocolInfo(protocolInfo);
+            gfwRuleEntity.setData(protocolInfo.getHostAddress());
+            wildcardCheck(gfwRuleEntity);
+            return;
+
+        }
+
+        if (line.startsWith("/")) {
+            line = line.substring(1, line.length() - 1);
+            gfwRuleEntity.setGfwDirective(GFWDirective.REG_MATCH);
+            gfwRuleEntity.setPattern(Pattern.compile(line));
+            gfwRuleEntity.setPatternStr(line);
+            return;
+        }
+        if (line.startsWith(".")) {
+            line = URLDecoder.decode(line, StandardCharsets.UTF_8);
+            gfwRuleEntity.setGfwDirective(GFWDirective.HOST_END_WIDTH);
+            ProtocolInfo protocolInfo = UtilTools.parseProtocolInfo(line);
+            gfwRuleEntity.setData(protocolInfo.getHostAddress());
+            gfwRuleEntity.setProtocolInfo(protocolInfo);
+            wildcardCheck(gfwRuleEntity);
+            return;
+        }
+        if (Pattern.compile("^\\d").matcher(line).find() || Pattern.compile("^\\w").matcher(line).find()) {
+            line = URLDecoder.decode(line, StandardCharsets.UTF_8);
+            gfwRuleEntity.setGfwDirective(GFWDirective.HOST_MATCH);
+            ProtocolInfo protocolInfo = UtilTools.parseProtocolInfo(line);
+            gfwRuleEntity.setData(protocolInfo.getHostAddress());
+            gfwRuleEntity.setProtocolInfo(protocolInfo);
+            wildcardCheck(gfwRuleEntity);
+            return;
+        }
+        throw new RuntimeException("Unresolved string:" + line);
+    }
+
+    public void wildcardCheck(GFWRuleEntity gfwRuleEntity) {
+        if (gfwRuleEntity.getData().contains("*")) {
+            String tmpStr = gfwRuleEntity.getData();
+            tmpStr = tmpStr.replace(".", "\\.");
+            tmpStr = tmpStr.replace("*", ".*");
+            gfwRuleEntity.setPatternStr("^" + tmpStr + "$");
+            gfwRuleEntity.setPattern(Pattern.compile(gfwRuleEntity.getPatternStr()));
+            //更改为正则表达式校验
+            gfwRuleEntity.setGfwDirective(GFWDirective.REG_MATCH);
+        }
+    }
+
     public Directive check(String address, int port) {
-        //log.info("check {}:{}", address, String.valueOf(port));
-        int i = 0;
+        List<String> urlLike = new ArrayList<>();
+
+        urlLike.add(address);
+        urlLike.add(String.format("%s:%d", address, port));
+        if (port == 443) {
+            urlLike.add(String.format("https://%s/aa/bb", address));
+        } else if (port == 80) {
+            urlLike.add(String.format("http://%s/aa/bb", address));
+        } else {
+            urlLike.add(String.format("https://%s:%d/aa/bb", address, port));
+            urlLike.add(String.format("http://%s:%d/aa/bb", address, port));
+        }
+
+        log.info("address:{},port:{},urlLike:{}", address, port, UtilTools.objToString(urlLike));
+
         for (GFWRuleEntity gfwRuleEntity : gfwRuleEntities) {
             //log.info("check {}:{} [{}] {}", address, String.valueOf(port), i, gfwRuleEntity.getOriData());
             /*if(i==499){
                 System.out.println(i);
             }*/
-            Directive directive = gfwRuleEntity.check(address, port);
+            Directive directive = gfwRuleEntity.check(address, port, urlLike);
             if (directive != Directive.MISS) {
+                log.info("check {}:{} ==>{},{}", address, port, directive, UtilTools.objToString(gfwRuleEntity));
                 return directive;
             }
-            i++;
         }
-        //log.info("check {}:{} ==>{}", address, String.valueOf(port), Directive.MISS);
+        log.info("check {}:{} ==>{}", address, port, Directive.MISS);
         return super.check(address, port);
 
     }

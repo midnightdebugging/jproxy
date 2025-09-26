@@ -11,11 +11,6 @@
 
     <artifactId>local-server</artifactId>
 
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>org.pierce</groupId>
@@ -60,6 +55,17 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>${jproxy.java.source}</source>
+                    <target>${jproxy.java.target}</target>
+                    <!-- 推荐同时设置 release 参数 -->
+                    <release>${jproxy.java.target}</release>
+                </configuration>
             </plugin>
         </plugins>
         <testResources>

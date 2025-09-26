@@ -43,7 +43,7 @@ public class LocalServer {
     }
 
     public void initialize() {
-        Jproxy.getInstance().initialize();
+        Jproxy.getInstance().initialize(getClass(),true);
         connectionTypeCheck = new DefaultConnectionTypeCheck();
     }
 
@@ -73,6 +73,10 @@ public class LocalServer {
     }
 
     public static void main(String[] args) {
+
+        System.setProperty("javax.net.debug", "ssl:handshake");
+        LocalServer.getInstance().initialize();
+
         EventLoopGroup eventLoopGroup = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
