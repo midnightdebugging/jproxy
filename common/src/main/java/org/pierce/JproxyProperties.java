@@ -20,11 +20,11 @@ public class JproxyProperties {
 
     private static final Logger log = LoggerFactory.getLogger(JproxyProperties.class);
 
-    public static void loadPropertiesByClassPath(String path) {
-        loadPropertiesByClassPath(path, false);
+    public static boolean loadPropertiesByClassPath(String path) {
+        return loadPropertiesByClassPath(path, false);
     }
 
-    public static void loadPropertiesByClassPath(String path, boolean necessary) {
+    public static boolean loadPropertiesByClassPath(String path, boolean necessary) {
         log.info("loadProperties:{}", path);
         try (InputStream inputStream = UtilTools.class.getResourceAsStream(path)) {
             if (inputStream == null) {
@@ -32,16 +32,16 @@ public class JproxyProperties {
                 if (necessary) {
                     throw new RuntimeException("inputStream ==null");
                 }
+                return false;
             }
-            if (inputStream != null) {
-                properties.load(inputStream);
-            }
-
+            properties.load(inputStream);
+            return true;
         } catch (IOException e) {
             log.error("IOException", e);
             if (necessary) {
                 throw new RuntimeException(e);
             }
+            return false;
         }
 
     }
@@ -75,8 +75,8 @@ public class JproxyProperties {
 
     public static void initialize() {
 
-        loadPropertiesByClassPath("/application-common.properties",true);
-        loadPropertiesByClassPath("/application.properties",true);
+        loadPropertiesByClassPath("/application-common.properties", true);
+        loadPropertiesByClassPath("/application.properties", true);
 
         String env = System.getProperty("env");
         if (env == null || env.isEmpty()) {
@@ -88,13 +88,14 @@ public class JproxyProperties {
         }
 
         properties.putAll(System.getProperties());
-        
-        loadPropertiesByClassPath(evaluate("/application-${env}.properties"));
 
+        boolean loaded = loadPropertiesByClassPath(evaluate("/application-${env}.properties"));
+        if (!loaded) {
+            // load from ${jproxy.config-path}
+            loadPropertiesByFilePath(evaluate("${jproxy.config-path}/application-${env}.properties"));
+        }
 
         loadPropertiesByFilePath(getProperty("tls.properties"));
-
-
 
 
         properties.setProperty("jdbc.file-dir", JproxyProperties.getProperty("jdbc.file-dir"));

@@ -11,7 +11,6 @@
 
     <artifactId>common</artifactId>
 
-
     <dependencies>
         <!-- https://mvnrepository.com/artifact/io.netty/netty-transport -->
         <dependency>
@@ -128,5 +127,18 @@
                 </includes>
             </testResource>
         </testResources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>${jproxy.java.source}</source>
+                    <target>${jproxy.java.target}</target>
+                    <!-- 推荐同时设置 release 参数 -->
+                    <release>${jproxy.java.target}</release>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 </project>
