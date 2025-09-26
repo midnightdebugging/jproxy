@@ -46,9 +46,6 @@ public final class SocksServer implements JproxyServer {
     @Override
     public void start(EventLoopGroup eventLoopGroup) {
 
-        System.setProperty("javax.net.debug", "ssl:handshake");
-        LocalServer.getInstance().initialize();
-
         //int port = Integer.parseInt(JproxyProperties.getProperty("local-server.socks.link-in.port"));
 
 

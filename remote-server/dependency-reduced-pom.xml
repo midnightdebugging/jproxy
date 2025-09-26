@@ -42,6 +42,15 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+        <configuration>
+          <source>${jproxy.java.source}</source>
+          <target>${jproxy.java.target}</target>
+          <release>${jproxy.java.target}</release>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
   <dependencies>

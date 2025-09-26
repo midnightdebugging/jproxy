@@ -13,7 +13,24 @@ import org.slf4j.LoggerFactory;
 
 public class RemoteServer {
 
+
+    private final static RemoteServer instance = new RemoteServer();
+
+
     private static final Logger log = LoggerFactory.getLogger(RemoteServer.class);
+
+    private RemoteServer() {
+
+    }
+
+    public static RemoteServer getInstance() {
+        return instance;
+    }
+
+    public void initialize() {
+        Jproxy.getInstance().initialize(getClass(),false);
+    }
+
 
     private final static NameListCheck nameListCheck = new TextNameListCheck() {
         {
@@ -26,6 +43,9 @@ public class RemoteServer {
     }
 
     public static void main(String[] args) {
+        System.setProperty("javax.net.debug", "ssl:handshake");
+        RemoteServer.getInstance().initialize();
+
         EventLoopGroup eventLoopGroup = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
