@@ -1,8 +1,6 @@
 package org.pierce.impl;
 
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.MultiThreadIoEventLoopGroup;
-import io.netty.channel.nio.NioIoHandler;
 import io.netty.util.concurrent.*;
 import org.apache.ibatis.session.SqlSession;
 import org.pierce.*;
@@ -26,19 +24,7 @@ public class DefaultDomainQuery {
     private static final HashMap<String, Integer> blackList0 = new HashMap<>();
 
     private final static FailTryCheck failTryCheck = new MemoryTimeOutFailTryCheck();
-    static EventLoopGroup eventLoopGroup = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
 
-    static {
-
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-
-                log.info("eventLoopGroup.shutdownGracefully();");
-                eventLoopGroup.shutdownGracefully();
-            }
-        });
-    }
 
     public static void query(EventLoopGroup eventLoop, String domain, Promise<String> promise) {
         log.info("blackList0:{}", UtilTools.objToString(blackList0));
@@ -62,7 +48,7 @@ public class DefaultDomainQuery {
         }
         EventExecutor executor = ImmediateEventExecutor.INSTANCE;
 
-        DomainQuery domainQuery = new JproxyDomainQuery(eventLoopGroup);
+        DomainQuery domainQuery = new JproxyDomainQuery(Jproxy.getEventLoopGroup());
         Promise<List<String>> jproxyPromise = executor.newPromise();
         jproxyPromise.addListener(new GenericFutureListener<Future<? super List<String>>>() {
             @Override

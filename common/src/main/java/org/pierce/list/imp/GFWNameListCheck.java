@@ -1,8 +1,12 @@
 package org.pierce.list.imp;
 
+import io.netty.channel.Channel;
+import io.netty.util.concurrent.Promise;
+import org.pierce.Downloader;
 import org.pierce.JproxyProperties;
 import org.pierce.UtilTools;
 import org.pierce.entity.ProtocolInfo;
+import org.pierce.imp.HttpDownloader;
 import org.pierce.list.Directive;
 import org.pierce.list.NameListCheck;
 import org.pierce.list.gfw.Base64InputStream;
@@ -27,21 +31,46 @@ public class GFWNameListCheck extends DefaultNameListCheck implements NameListCh
 
     private static final Logger log = LoggerFactory.getLogger(GFWNameListCheck.class);
 
-    List<GFWRuleEntity> gfwRuleEntities = new ArrayList<>();
+    ArrayList<GFWRuleEntity> gfwRuleEntities = new ArrayList<GFWRuleEntity>();
+
+    private static GFWNameListCheck instance = new GFWNameListCheck() {
+        {
+            try {
+                loadConfigure();
+            } catch (IOException e) {
+                log.error("loadConfigure,error", e);
+                throw new RuntimeException(e);
+            }
+        }
+    };
+
+    public static GFWNameListCheck getInstance() {
+        if (instance == null) {
+            instance = new GFWNameListCheck();
+        }
+        return instance;
+    }
 
 
     public GFWNameListCheck() {
     }
+
 
     public GFWNameListCheck(InputStream is) throws IOException {
         parser(is);
     }
 
     public void loadConfigure() throws IOException {
+        loadConfigure(false);
+    }
+
+    public void loadConfigure(boolean needSucceed) throws IOException {
         String listPath = JproxyProperties.getProperty("gfw-path");
         File file = new File(listPath);
         if (!file.isFile()) {
-            //throw new RuntimeException();
+            if (needSucceed) {
+                throw new RuntimeException("!file.isFile():" + listPath);
+            }
             log.error("gfw-path no exist:{}", listPath);
             return;
         }
@@ -91,7 +120,7 @@ public class GFWNameListCheck extends DefaultNameListCheck implements NameListCh
         });
         gfwRuleEntities.clear();
 
-        gfwRuleEntities = Arrays.asList(gfwRuleEntityArr);
+        gfwRuleEntities.addAll(Arrays.asList(gfwRuleEntityArr));
 
         for (GFWRuleEntity gfwRuleEntity : gfwRuleEntities) {
             if (gfwRuleEntity.getGfwDirective() == GFWDirective.HOST_MATCH || gfwRuleEntity.getGfwDirective() == GFWDirective.HOST_END_WIDTH) {
@@ -201,10 +230,6 @@ public class GFWNameListCheck extends DefaultNameListCheck implements NameListCh
         log.info("address:{},port:{},urlLike:{}", address, port, UtilTools.objToString(urlLike));
 
         for (GFWRuleEntity gfwRuleEntity : gfwRuleEntities) {
-            //log.info("check {}:{} [{}] {}", address, String.valueOf(port), i, gfwRuleEntity.getOriData());
-            /*if(i==499){
-                System.out.println(i);
-            }*/
             Directive directive = gfwRuleEntity.check(address, port, urlLike);
             if (directive != Directive.MISS) {
                 log.info("check {}:{} ==>{},{}", address, port, directive, UtilTools.objToString(gfwRuleEntity));
@@ -223,5 +248,35 @@ public class GFWNameListCheck extends DefaultNameListCheck implements NameListCh
             return defaultDirective;
         }
         return directive;
+    }
+
+    public void download() throws InterruptedException {
+        String gfwList = JproxyProperties.getProperty("local-server.gfw-list");
+        download(gfwList);
+    }
+
+    public void download(String url) throws InterruptedException {
+        String gfwPath = JproxyProperties.getProperty("gfw-path");
+
+        File file = new File(gfwPath);
+        if (file.exists()) {
+            if (!file.delete()) {
+                throw new RuntimeException("!file.delete()");
+            }
+        }
+
+        Downloader downloader = new HttpDownloader();
+        Promise<Channel> promise = downloader.download(url, gfwPath, true);
+        promise.await().sync();
+    }
+
+
+    public void reload() throws IOException {
+        gfwRuleEntities.clear();
+        loadConfigure(true);
+    }
+
+    public String list() throws IOException {
+        return UtilTools.objToString(gfwRuleEntities.reversed(), true);
     }
 }

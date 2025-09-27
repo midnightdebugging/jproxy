@@ -1,5 +1,8 @@
 package org.pierce;
 
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
+import io.netty.channel.nio.NioIoHandler;
 import org.pierce.pki.ECCPKIInstaller;
 import org.pierce.pki.PKIInstaller;
 import org.slf4j.Logger;
@@ -12,9 +15,28 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
 public class Jproxy {
+
     private static final Jproxy instance = new Jproxy();
 
     private static final Logger log = LoggerFactory.getLogger(Jproxy.class);
+
+    static EventLoopGroup eventLoopGroup = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
+
+    static {
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            @Override
+            public void run() {
+
+                log.info("eventLoopGroup.shutdownGracefully();");
+                eventLoopGroup.shutdownGracefully();
+            }
+        });
+    }
+
+    public static EventLoopGroup getEventLoopGroup() {
+        return eventLoopGroup;
+    }
 
     private Jproxy() {
 

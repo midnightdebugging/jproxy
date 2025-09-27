@@ -15,7 +15,7 @@ public class EntityDesc {
 
     String data;
 
-    Pattern pattern;
+    transient Pattern pattern;
 
 
     String address;

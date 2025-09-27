@@ -128,8 +128,7 @@ public class UtilTools {
                     protocolInfo.setPort(80);
                 }
             }
-
-
+            protocolInfo.setPath("/" + url.substring(matcher.end()));
         }
         return protocolInfo;
     }

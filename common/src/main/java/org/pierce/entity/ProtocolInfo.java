@@ -2,8 +2,12 @@ package org.pierce.entity;
 
 public class ProtocolInfo {
     String protocol;
+
     String hostAddress;
+
     int port;
+
+    String path;
 
     public String getProtocol() {
         return protocol;
@@ -27,5 +31,13 @@ public class ProtocolInfo {
 
     public void setPort(int port) {
         this.port = port;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
     }
 }

@@ -56,6 +56,11 @@
                 <artifactId>netty-codec-http</artifactId>
                 <version>${netty.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-handler-proxy</artifactId>
+                <version>${netty.version}</version> <!-- 使用最新版本 -->
+            </dependency>
             <!-- 若使用 OpenSSL 加速 -->
             <dependency>
                 <groupId>io.netty</groupId>
@@ -158,6 +163,21 @@
         </dependency>
     </dependencies>
     <build>
+        <testResources>
+            <!-- 默认测试资源目录 -->
+            <testResource>
+                <directory>src/test/resources</directory>
+            </testResource>
+
+            <!-- 添加自定义测试资源目录 -->
+            <testResource>
+                <directory>src/test/custom-resources</directory>
+                <!-- 可选：包含特定文件 -->
+                <includes>
+                    <include>**/*.properties</include>
+                </includes>
+            </testResource>
+        </testResources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

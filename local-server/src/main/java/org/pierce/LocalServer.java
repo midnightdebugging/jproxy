@@ -7,16 +7,15 @@ import org.apache.ibatis.session.SqlSession;
 import org.pierce.httpproxy.HttpProxyServer;
 import org.pierce.imp.DefaultSelector;
 import org.pierce.impl.DefaultConnectionTypeCheck;
-import org.pierce.mybatis.entity.HostName2Address;
-import org.pierce.mybatis.mapper.HostName2AddressMapper;
 import org.pierce.list.imp.DataBaseNameListCheck;
 import org.pierce.list.imp.GFWNameListCheck;
 import org.pierce.list.imp.TextNameListCheck;
+import org.pierce.manage.ManageServer;
+import org.pierce.mybatis.entity.HostName2Address;
+import org.pierce.mybatis.mapper.HostName2AddressMapper;
 import org.pierce.socks.SocksServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 
 public class LocalServer {
@@ -43,7 +42,7 @@ public class LocalServer {
     }
 
     public void initialize() {
-        Jproxy.getInstance().initialize(getClass(),true);
+        Jproxy.getInstance().initialize(getClass(), true);
         connectionTypeCheck = new DefaultConnectionTypeCheck();
     }
 
@@ -85,12 +84,18 @@ public class LocalServer {
                 log.info("eventLoopGroup.shutdownGracefully()");
             }
         });
+
+
+        JproxyServer manageServer = new ManageServer();
+        manageServer.start(eventLoopGroup);
+
+
         //+0.FixedReturnConnectListCheck
         JproxyServer socksServer = new SocksServer();
         socksServer.start(eventLoopGroup);
 
         //+1.DataBaseNameListCheck
-        socksServer = new SocksServer("DataBaseNameListCheck", new DataBaseNameListCheck());
+        socksServer = new SocksServer("DataBaseNameListCheck", DataBaseNameListCheck.getInstance());
         socksServer.start(eventLoopGroup);
 
         //+2.TextNameListCheck
@@ -103,15 +108,7 @@ public class LocalServer {
         socksServer.start(eventLoopGroup);
 
         //+3.GFWNameListCheck
-        socksServer = new SocksServer("GFWNameListCheck", new GFWNameListCheck() {
-            {
-                try {
-                    loadConfigure();
-                } catch (IOException e) {
-                    log.error("loadConfigure,error", e);
-                }
-            }
-        });
+        socksServer = new SocksServer("GFWNameListCheck", GFWNameListCheck.getInstance());
         socksServer.start(eventLoopGroup);
 
         ////////// http proxy
@@ -121,7 +118,7 @@ public class LocalServer {
 
 
         //+1.DataBaseNameListCheck
-        httpProxyServer = new HttpProxyServer("DataBaseNameListCheck", new DataBaseNameListCheck());
+        httpProxyServer = new HttpProxyServer("DataBaseNameListCheck", DataBaseNameListCheck.getInstance());
         httpProxyServer.start(eventLoopGroup);
 
         //+2.TextNameListCheck
@@ -134,15 +131,7 @@ public class LocalServer {
         httpProxyServer.start(eventLoopGroup);
 
         //+3.GFWNameListCheck
-        httpProxyServer = new HttpProxyServer("GFWNameListCheck", new GFWNameListCheck() {
-            {
-                try {
-                    loadConfigure();
-                } catch (IOException e) {
-                    log.error("loadConfigure,error", e);
-                }
-            }
-        });
+        httpProxyServer = new HttpProxyServer("GFWNameListCheck", GFWNameListCheck.getInstance());
         httpProxyServer.start(eventLoopGroup);
     }
 }

@@ -2,12 +2,15 @@ package org.pierce.list.imp;
 
 import org.apache.ibatis.session.SqlSession;
 import org.pierce.DataBase;
+import org.pierce.UtilTools;
 import org.pierce.list.Directive;
 import org.pierce.list.MatchType;
 import org.pierce.list.NameListCheck;
 import org.pierce.list.entity.EntityDesc;
 import org.pierce.list.entity.NameEntity;
 import org.pierce.list.mapper.NameListMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,10 +21,28 @@ public class DataBaseNameListCheck extends DefaultNameListCheck implements NameL
 
     final Pattern pattern = Pattern.compile("(.*)/(.*)");
 
-    final List<EntityDesc> entityDescList = new ArrayList<>();
+    List<EntityDesc> entityDescList = new ArrayList<>();
 
+    private static final Logger log = LoggerFactory.getLogger(GFWNameListCheck.class);
 
-    public DataBaseNameListCheck() {
+    private static final DataBaseNameListCheck instance = new DataBaseNameListCheck();
+
+    public static DataBaseNameListCheck getInstance() {
+        return instance;
+    }
+
+    public String list() {
+        return UtilTools.objToString(entityDescList.reversed(),true);
+    }
+
+    public void reload() {
+        log.info("reload");
+        load();
+
+    }
+
+    public void load() {
+        final List<EntityDesc> entityDescList = new ArrayList<>();
         try (SqlSession sqlSession = DataBase.getSqlSessionFactory().openSession()) {
             NameListMapper mapper = sqlSession.getMapper(NameListMapper.class);
             List<NameEntity> list = mapper.selectAll();
@@ -51,8 +72,13 @@ public class DataBaseNameListCheck extends DefaultNameListCheck implements NameL
                 }
                 entityDescList.add(entityDesc);
             }
+            this.entityDescList = entityDescList;
 
         }
+    }
+
+    private DataBaseNameListCheck() {
+        load();
     }
 
     @Override
@@ -66,14 +92,5 @@ public class DataBaseNameListCheck extends DefaultNameListCheck implements NameL
         }
         return super.check(address, port);
     }
-
-/*    @Override
-    public Directive check(String address, int port, Directive defaultDirective) {
-        Directive directive = check(address,port);
-        if (directive == Directive.MISS) {
-            return defaultDirective;
-        }
-        return directive;
-    }*/
 
 }
