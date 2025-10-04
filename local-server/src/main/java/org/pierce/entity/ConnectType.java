@@ -1,6 +1,6 @@
 package org.pierce.entity;
 
-import org.pierce.nlist.Directive;
+import org.pierce.list.Directive;
 
 public class ConnectType {
     Directive directive;

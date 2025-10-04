@@ -17,7 +17,7 @@ import org.pierce.entity.LocalLinkStep;
 import org.pierce.entity.ProtocolInfo;
 import org.pierce.handler.LinkOutHandler;
 import org.pierce.handler.LinkOutOverWebSocketHandler;
-import org.pierce.nlist.Directive;
+import org.pierce.list.Directive;
 import org.pierce.session.SessionAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

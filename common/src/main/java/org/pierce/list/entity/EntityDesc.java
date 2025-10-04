@@ -1,9 +1,9 @@
-package org.pierce.nlist.entity;
+package org.pierce.list.entity;
 
 import org.apache.commons.validator.routines.InetAddressValidator;
-import org.pierce.nlist.Directive;
-import org.pierce.nlist.MatchType;
-import org.pierce.nlist.util.NetTools;
+import org.pierce.list.Directive;
+import org.pierce.list.MatchType;
+import org.pierce.list.util.NetTools;
 
 import java.util.regex.Pattern;
 

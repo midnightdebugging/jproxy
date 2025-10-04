@@ -1,4 +1,4 @@
-package org.pierce.nlist.util;
+package org.pierce.list.util;
 
 public class NetTools {
     public static byte[] IP2Bytes(String address) {

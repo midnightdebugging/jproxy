@@ -1,7 +1,7 @@
-package org.pierce.nlist.imp;
+package org.pierce.list.imp;
 
-import org.pierce.nlist.Directive;
-import org.pierce.nlist.NameListCheck;
+import org.pierce.list.Directive;
+import org.pierce.list.NameListCheck;
 
 public class FixedReturnConnectListCheck extends DefaultNameListCheck  implements NameListCheck {
 

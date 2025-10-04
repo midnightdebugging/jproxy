@@ -3,8 +3,8 @@ package org.pierce.socks;
 import org.junit.Before;
 import org.junit.Test;
 import org.pierce.LocalServer;
-import org.pierce.nlist.NameListCheck;
-import org.pierce.nlist.imp.FixedReturnConnectListCheck;
+import org.pierce.list.NameListCheck;
+import org.pierce.list.imp.FixedReturnConnectListCheck;
 
 public class LocalServerTest {
 

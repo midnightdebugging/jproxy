@@ -2,7 +2,7 @@ package org.pierce.socks;
 
 import org.junit.Test;
 import org.pierce.RemoteServer;
-import org.pierce.nlist.NameListCheck;
+import org.pierce.list.NameListCheck;
 
 public class NameTest {
     @Test

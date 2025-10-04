@@ -1,4 +1,4 @@
-package org.pierce.nlist;
+package org.pierce.list;
 
 public enum Directive {
     DISALLOW_CONNECT,

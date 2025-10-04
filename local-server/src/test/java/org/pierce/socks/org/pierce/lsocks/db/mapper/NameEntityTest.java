@@ -1,8 +1,8 @@
 package org.pierce.socks.org.pierce.lsocks.db.mapper;
 
 import org.junit.Test;
-import org.pierce.nlist.NameListCheck;
-import org.pierce.nlist.imp.TextNameListCheck;
+import org.pierce.list.NameListCheck;
+import org.pierce.list.imp.TextNameListCheck;
 
 import java.io.IOException;
 import java.io.InputStream;

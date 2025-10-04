@@ -35,7 +35,7 @@
 
     <mappers>
         <package name="org.pierce.mybatis"/>
-        <package name="org.pierce.nlist.mapper"/>
+        <package name="org.pierce.list.mapper"/>
     </mappers>
 
 </configuration>

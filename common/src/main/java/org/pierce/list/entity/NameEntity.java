@@ -1,4 +1,4 @@
-package org.pierce.nlist.entity;
+package org.pierce.list.entity;
 
 public class NameEntity {
     int seq;

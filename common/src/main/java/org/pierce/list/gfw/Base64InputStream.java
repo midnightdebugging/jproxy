@@ -1,4 +1,4 @@
-package org.pierce.nlist.gfw;
+package org.pierce.list.gfw;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

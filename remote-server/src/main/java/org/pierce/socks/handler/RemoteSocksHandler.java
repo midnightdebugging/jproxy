@@ -8,7 +8,7 @@ import org.pierce.RemoteServer;
 import org.pierce.UtilTools;
 import org.pierce.codec.*;
 import org.pierce.handler.LinkOutHandler;
-import org.pierce.nlist.Directive;
+import org.pierce.list.Directive;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

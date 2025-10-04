@@ -1,7 +1,7 @@
 package org.pierce.session;
 
 import io.netty.util.AttributeKey;
-import org.pierce.nlist.NameListCheck;
+import org.pierce.list.NameListCheck;
 
 public class SessionAttributes {
 

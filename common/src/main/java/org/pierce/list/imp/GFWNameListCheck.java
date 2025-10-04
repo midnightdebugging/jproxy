@@ -1,13 +1,13 @@
-package org.pierce.nlist.imp;
+package org.pierce.list.imp;
 
 import org.pierce.JproxyProperties;
 import org.pierce.UtilTools;
 import org.pierce.entity.ProtocolInfo;
-import org.pierce.nlist.Directive;
-import org.pierce.nlist.NameListCheck;
-import org.pierce.nlist.gfw.Base64InputStream;
-import org.pierce.nlist.gfw.GFWDirective;
-import org.pierce.nlist.gfw.GFWRuleEntity;
+import org.pierce.list.Directive;
+import org.pierce.list.NameListCheck;
+import org.pierce.list.gfw.Base64InputStream;
+import org.pierce.list.gfw.GFWDirective;
+import org.pierce.list.gfw.GFWRuleEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

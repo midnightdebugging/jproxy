@@ -1,11 +1,10 @@
-package org.pierce.nlist.gfw;
+package org.pierce.list.gfw;
 
 import org.pierce.entity.ProtocolInfo;
-import org.pierce.nlist.Directive;
+import org.pierce.list.Directive;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
