@@ -6,7 +6,7 @@ import io.netty.handler.codec.socksx.SocksPortUnificationServerHandler;
 import org.pierce.JproxyProperties;
 import org.pierce.handler.DebugHandler;
 import org.pierce.handler.TlsServerHandlerBuilder;
-import org.pierce.nlist.NameListCheck;
+import org.pierce.list.NameListCheck;
 import org.pierce.session.SessionAttributes;
 
 

@@ -1,4 +1,4 @@
-package org.pierce.nlist.gfw;
+package org.pierce.list.gfw;
 
 public enum GFWDirective {
     URL_MATCH,

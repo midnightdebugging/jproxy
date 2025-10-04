@@ -1,13 +1,10 @@
 package org.pierce;
 
 import org.junit.Test;
-import org.pierce.nlist.Directive;
-import org.pierce.nlist.gfw.GFWRuleEntity;
-import org.pierce.nlist.imp.GFWNameListCheck;
+import org.pierce.list.gfw.GFWRuleEntity;
+import org.pierce.list.imp.GFWNameListCheck;
 
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 public class GFWNameListCheckTest {

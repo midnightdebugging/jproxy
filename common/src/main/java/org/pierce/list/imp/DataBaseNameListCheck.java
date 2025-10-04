@@ -1,13 +1,13 @@
-package org.pierce.nlist.imp;
+package org.pierce.list.imp;
 
 import org.apache.ibatis.session.SqlSession;
 import org.pierce.DataBase;
-import org.pierce.nlist.Directive;
-import org.pierce.nlist.MatchType;
-import org.pierce.nlist.NameListCheck;
-import org.pierce.nlist.entity.EntityDesc;
-import org.pierce.nlist.entity.NameEntity;
-import org.pierce.nlist.mapper.NameListMapper;
+import org.pierce.list.Directive;
+import org.pierce.list.MatchType;
+import org.pierce.list.NameListCheck;
+import org.pierce.list.entity.EntityDesc;
+import org.pierce.list.entity.NameEntity;
+import org.pierce.list.mapper.NameListMapper;
 
 import java.util.ArrayList;
 import java.util.List;

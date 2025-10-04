@@ -6,7 +6,7 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import org.pierce.JproxyProperties;
 import org.pierce.handler.DebugHandler;
 import org.pierce.handler.TlsServerHandlerBuilder;
-import org.pierce.nlist.NameListCheck;
+import org.pierce.list.NameListCheck;
 import org.pierce.session.SessionAttributes;
 
 

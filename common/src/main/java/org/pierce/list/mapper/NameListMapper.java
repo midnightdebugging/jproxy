@@ -1,10 +1,10 @@
-package org.pierce.nlist.mapper;
+package org.pierce.list.mapper;
 
 
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
-import org.pierce.nlist.entity.NameEntity;
+import org.pierce.list.entity.NameEntity;
 
 import java.util.List;
 

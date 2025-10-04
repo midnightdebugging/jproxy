@@ -1,9 +1,9 @@
-package org.pierce.nlist.gfw;
+package org.pierce.list.gfw;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class NameItem {
+public class GfwItem {
 
     public enum CMD {
         DIRECT,
@@ -35,10 +35,10 @@ public class NameItem {
 
     int sortingFactor;
 
-    public NameItem() {
+    public GfwItem() {
     }
 
-    public NameItem(CMD cmd, TYPE type, String data) {
+    public GfwItem(CMD cmd, TYPE type, String data) {
         this.cmd = cmd;
         this.type = type;
         this.data = data;

@@ -1,9 +1,9 @@
-package org.pierce.nlist.imp;
+package org.pierce.list.imp;
 
-import org.pierce.nlist.Directive;
-import org.pierce.nlist.MatchType;
-import org.pierce.nlist.NameListCheck;
-import org.pierce.nlist.entity.EntityDesc;
+import org.pierce.list.Directive;
+import org.pierce.list.MatchType;
+import org.pierce.list.NameListCheck;
+import org.pierce.list.entity.EntityDesc;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
