@@ -32,9 +32,9 @@
     </appender>
 
     <!-- 设置包级别的日志 -->
-    <logger name="org.pierce" level="INFO"/>
+    <logger name="org.pierce" level="info"/>
 
-    <root level="INFO">
+    <root level="info">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="ROLLING_FILE"/>
     </root>

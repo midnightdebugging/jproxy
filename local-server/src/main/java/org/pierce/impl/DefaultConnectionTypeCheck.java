@@ -4,9 +4,9 @@ import io.netty.channel.Channel;
 import io.netty.channel.EventLoop;
 import io.netty.util.concurrent.*;
 import org.pierce.ConnectionTypeCheck;
-import org.pierce.entity.ConnectType;
 import org.pierce.list.Directive;
 import org.pierce.list.NameListCheck;
+import org.pierce.list.entity.ConnectType;
 import org.pierce.session.SessionAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +27,10 @@ public class DefaultConnectionTypeCheck implements ConnectionTypeCheck {
     public void check(Channel channel, String address, int targetPort, Promise<ConnectType> promise) {
 
         EventLoop eventLoop = channel.eventLoop();
-        Directive directive = channel.attr(SessionAttributes.NAME_LIST_CHECK).get().check(address, targetPort);
+
+        NameListCheck nameListCheck = channel.attr(SessionAttributes.NAME_LIST_CHECK).get();
+
+        Directive directive = nameListCheck.check(address, targetPort);
 
         log.info("{} {}", directive, address);
         if (directive == Directive.DISALLOW_CONNECT) {
@@ -60,6 +63,13 @@ public class DefaultConnectionTypeCheck implements ConnectionTypeCheck {
 
         }
 
+    }
+
+    public Promise<ConnectType> check(Channel channel, String address, int targetPort) {
+        EventExecutor executor = ImmediateEventExecutor.INSTANCE;
+        Promise<ConnectType> promise = new DefaultPromise<>(executor);
+        check(channel, address, targetPort, promise);
+        return promise;
     }
 
 }

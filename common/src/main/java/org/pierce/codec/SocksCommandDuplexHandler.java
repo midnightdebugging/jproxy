@@ -49,7 +49,10 @@ public class SocksCommandDuplexHandler extends ChannelDuplexHandler {
     private SocksCommand toSocksCommand(BinaryWebSocketFrame binaryWebSocketFrame) throws ClassNotFoundException {
         ByteBuf byteBuf = binaryWebSocketFrame.content().copy();
         try {
-            log.debug("{}", ByteBufUtil.prettyHexDump(byteBuf));
+            if (log.isDebugEnabled()) {
+                log.debug("{}", ByteBufUtil.prettyHexDump(byteBuf));
+            }
+
 
             int length1 = byteBuf.readInt();
             byte[] newClazzName = new byte[length1];
@@ -77,7 +80,10 @@ public class SocksCommandDuplexHandler extends ChannelDuplexHandler {
             String json = UtilTools.objToString(socksCommand);
             byteBuf.writeInt(json.length());
             byteBuf.writeBytes(json.getBytes());
-            log.info("{}", ByteBufUtil.prettyHexDump(byteBuf));
+            if (log.isDebugEnabled()) {
+                log.debug("{}", ByteBufUtil.prettyHexDump(byteBuf));
+            }
+
             return new BinaryWebSocketFrame(byteBuf.retain());
         } finally {
 

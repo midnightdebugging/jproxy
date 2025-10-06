@@ -7,7 +7,9 @@ import org.apache.ibatis.session.SqlSession;
 import org.pierce.httpproxy.HttpProxyServer;
 import org.pierce.imp.DefaultSelector;
 import org.pierce.impl.DefaultConnectionTypeCheck;
+import org.pierce.list.Directive;
 import org.pierce.list.imp.DataBaseNameListCheck;
+import org.pierce.list.imp.FixedReturnConnectListCheck;
 import org.pierce.list.imp.GFWNameListCheck;
 import org.pierce.list.imp.TextNameListCheck;
 import org.pierce.manage.ManageServer;
@@ -111,6 +113,10 @@ public class LocalServer {
         socksServer = new SocksServer("GFWNameListCheck", GFWNameListCheck.getInstance());
         socksServer.start(eventLoopGroup);
 
+
+        socksServer = new SocksServer("local-link-out",new FixedReturnConnectListCheck(Directive.DIRECT_CONNECT));
+        socksServer.start(eventLoopGroup);
+
         ////////// http proxy
         //+0.FixedReturnConnectListCheck
         JproxyServer httpProxyServer = new HttpProxyServer();
@@ -132,6 +138,9 @@ public class LocalServer {
 
         //+3.GFWNameListCheck
         httpProxyServer = new HttpProxyServer("GFWNameListCheck", GFWNameListCheck.getInstance());
+        httpProxyServer.start(eventLoopGroup);
+
+        httpProxyServer = new HttpProxyServer("local-link-out",new FixedReturnConnectListCheck(Directive.DIRECT_CONNECT));
         httpProxyServer.start(eventLoopGroup);
     }
 }

@@ -5,7 +5,6 @@ import io.netty.channel.MultiThreadIoEventLoopGroup;
 import io.netty.channel.nio.NioIoHandler;
 import org.pierce.list.NameListCheck;
 import org.pierce.list.imp.TextNameListCheck;
-import org.pierce.socks.RemoteSocks;
 import org.pierce.websocket.RemoteWebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,8 +53,8 @@ public class RemoteServer {
                 log.info("eventLoopGroup.shutdownGracefully()");
             }
         });
-        JproxyServer remoteSocks = new RemoteSocks();
-        remoteSocks.start(eventLoopGroup);
+//        JproxyServer remoteSocks = new RemoteSocks();
+//        remoteSocks.start(eventLoopGroup);
 
         JproxyServer remoteWebSocket = new RemoteWebSocket();
         remoteWebSocket.start(eventLoopGroup);

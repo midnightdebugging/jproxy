@@ -2,6 +2,7 @@ package org.pierce.list.imp;
 
 import io.netty.channel.Channel;
 import io.netty.util.concurrent.Promise;
+import org.apache.commons.validator.routines.InetAddressValidator;
 import org.pierce.Downloader;
 import org.pierce.JproxyProperties;
 import org.pierce.UtilTools;
@@ -150,10 +151,12 @@ public class GFWNameListCheck extends DefaultNameListCheck implements NameListCh
             parserGFWRuleEntity(line, gfwRuleEntity);
             return;
         }
+
+
         if (line.startsWith("||")) {
             line = line.substring(2);
 
-            ProtocolInfo protocolInfo = UtilTools.parseProtocolInfo(line);
+            ProtocolInfo protocolInfo = UtilTools.parseProtocolInfo(line, true);
             gfwRuleEntity.setGfwDirective(GFWDirective.HOST_MATCH);
             gfwRuleEntity.setData(protocolInfo.getHostAddress());
             gfwRuleEntity.setProtocolInfo(protocolInfo);
@@ -165,7 +168,7 @@ public class GFWNameListCheck extends DefaultNameListCheck implements NameListCh
             line = line.substring(1);
             line = URLDecoder.decode(line, StandardCharsets.UTF_8);
             gfwRuleEntity.setGfwDirective(GFWDirective.URL_MATCH);
-            ProtocolInfo protocolInfo = UtilTools.parseProtocolInfo(line);
+            ProtocolInfo protocolInfo = UtilTools.parseProtocolInfo(line, true);
             gfwRuleEntity.setProtocolInfo(protocolInfo);
             gfwRuleEntity.setData(protocolInfo.getHostAddress());
             wildcardCheck(gfwRuleEntity);
@@ -183,7 +186,7 @@ public class GFWNameListCheck extends DefaultNameListCheck implements NameListCh
         if (line.startsWith(".")) {
             line = URLDecoder.decode(line, StandardCharsets.UTF_8);
             gfwRuleEntity.setGfwDirective(GFWDirective.HOST_END_WIDTH);
-            ProtocolInfo protocolInfo = UtilTools.parseProtocolInfo(line);
+            ProtocolInfo protocolInfo = UtilTools.parseProtocolInfo(line, true);
             gfwRuleEntity.setData(protocolInfo.getHostAddress());
             gfwRuleEntity.setProtocolInfo(protocolInfo);
             wildcardCheck(gfwRuleEntity);
@@ -192,7 +195,7 @@ public class GFWNameListCheck extends DefaultNameListCheck implements NameListCh
         if (Pattern.compile("^\\d").matcher(line).find() || Pattern.compile("^\\w").matcher(line).find()) {
             line = URLDecoder.decode(line, StandardCharsets.UTF_8);
             gfwRuleEntity.setGfwDirective(GFWDirective.HOST_MATCH);
-            ProtocolInfo protocolInfo = UtilTools.parseProtocolInfo(line);
+            ProtocolInfo protocolInfo = UtilTools.parseProtocolInfo(line, true);
             gfwRuleEntity.setData(protocolInfo.getHostAddress());
             gfwRuleEntity.setProtocolInfo(protocolInfo);
             wildcardCheck(gfwRuleEntity);
@@ -214,6 +217,9 @@ public class GFWNameListCheck extends DefaultNameListCheck implements NameListCh
     }
 
     public Directive check(String address, int port) {
+
+        InetAddressValidator ipValidator = InetAddressValidator.getInstance();
+
         List<String> urlLike = new ArrayList<>();
 
         urlLike.add(address);
@@ -234,6 +240,32 @@ public class GFWNameListCheck extends DefaultNameListCheck implements NameListCh
             if (directive != Directive.MISS) {
                 log.info("check {}:{} ==>{},{}", address, port, directive, UtilTools.objToString(gfwRuleEntity));
                 return directive;
+            }
+        }
+        if (ipValidator.isValidInet6Address(address)) {
+            address = UtilTools.iv6Expander(address);
+
+            urlLike = new ArrayList<>();
+
+            urlLike.add(address);
+            urlLike.add(String.format("[%s]:%d", address, port));
+            if (port == 443) {
+                urlLike.add(String.format("https://[%s]/aa/bb", address));
+            } else if (port == 80) {
+                urlLike.add(String.format("http://[%s]/aa/bb", address));
+            } else {
+                urlLike.add(String.format("https://[%s]:%d/aa/bb", address, port));
+                urlLike.add(String.format("http://[%s]:%d/aa/bb", address, port));
+            }
+
+            log.info("address:{},port:{},urlLike:{}", address, port, UtilTools.objToString(urlLike));
+
+            for (GFWRuleEntity gfwRuleEntity : gfwRuleEntities) {
+                Directive directive = gfwRuleEntity.check(address, port, urlLike);
+                if (directive != Directive.MISS) {
+                    log.info("check {}:{} ==>{},{}", address, port, directive, UtilTools.objToString(gfwRuleEntity));
+                    return directive;
+                }
             }
         }
         log.info("check {}:{} ==>{}", address, port, Directive.MISS);
