@@ -1,5 +1,6 @@
 package org.pierce.list.imp;
 
+import org.apache.commons.validator.routines.InetAddressValidator;
 import org.apache.ibatis.session.SqlSession;
 import org.pierce.DataBase;
 import org.pierce.UtilTools;
@@ -23,7 +24,7 @@ public class DataBaseNameListCheck extends DefaultNameListCheck implements NameL
 
     List<EntityDesc> entityDescList = new ArrayList<>();
 
-    private static final Logger log = LoggerFactory.getLogger(GFWNameListCheck.class);
+    private static final Logger log = LoggerFactory.getLogger(DataBaseNameListCheck.class);
 
     private static final DataBaseNameListCheck instance = new DataBaseNameListCheck();
 
@@ -32,7 +33,7 @@ public class DataBaseNameListCheck extends DefaultNameListCheck implements NameL
     }
 
     public String list() {
-        return UtilTools.objToString(entityDescList.reversed(),true);
+        return UtilTools.objToString(entityDescList.reversed(), true);
     }
 
     public void reload() {
@@ -42,6 +43,7 @@ public class DataBaseNameListCheck extends DefaultNameListCheck implements NameL
     }
 
     public void load() {
+        InetAddressValidator ipValidator = InetAddressValidator.getInstance();
         final List<EntityDesc> entityDescList = new ArrayList<>();
         try (SqlSession sqlSession = DataBase.getSqlSessionFactory().openSession()) {
             NameListMapper mapper = sqlSession.getMapper(NameListMapper.class);
@@ -57,7 +59,11 @@ public class DataBaseNameListCheck extends DefaultNameListCheck implements NameL
 
 
                 String data = nameEntity.getData();
-                entityDesc.setData(data);
+                if (ipValidator.isValidInet6Address(data)) {
+                    entityDesc.setData(UtilTools.iv6Expander(data));
+                } else {
+                    entityDesc.setData(data);
+                }
                 if (matchType == MatchType.REGULAR_MATCHING) {
                     entityDesc.setPattern(Pattern.compile(data));
                 } else if (matchType == MatchType.SUBNET) {
@@ -77,13 +83,16 @@ public class DataBaseNameListCheck extends DefaultNameListCheck implements NameL
         }
     }
 
-    private DataBaseNameListCheck() {
+    public DataBaseNameListCheck() {
         load();
     }
 
     @Override
     public Directive check(String address, int port) {
-
+        InetAddressValidator ipValidator = InetAddressValidator.getInstance();
+        if (ipValidator.isValidInet6Address(address)) {
+            address = UtilTools.iv6Expander(address);
+        }
         for (EntityDesc entityDesc : entityDescList) {
             Directive directive = entityDesc.test(address);
             if (directive != Directive.MISS) {

@@ -5,11 +5,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import org.apache.commons.validator.routines.InetAddressValidator;
 import org.pierce.entity.ProtocolInfo;
 import org.pierce.session.SessionAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetAddress;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Matcher;
@@ -97,10 +99,30 @@ public class UtilTools {
 
     private final static Pattern protocolPattern = Pattern.compile("^[a-z]+://");
 
-    private final static Pattern hostPortPattern = Pattern.compile("^(?:([^:/]+)|(\\[[^/]+]))(:\\d+)?(/|$)");
+    private final static Pattern hostPortPattern = Pattern.compile("^(?:([^:/]+)|\\[([^/]+)])(:\\d+)?(/|$)");
+
+    public static ProtocolInfo parseProtocolInfo(String url, boolean ipv6Expand) {
+        ProtocolInfo protocolInfo = parseProtocolInfo(url);
+        if (!ipv6Expand) {
+            return protocolInfo;
+        }
+        InetAddressValidator ipValidator = InetAddressValidator.getInstance();
+        if (!ipValidator.isValidInet6Address(protocolInfo.getHostAddress())) {
+            return protocolInfo;
+        }
+        protocolInfo.setHostAddress(UtilTools.iv6Expander(protocolInfo.getHostAddress()));
+        return protocolInfo;
+    }
 
     public static ProtocolInfo parseProtocolInfo(String url) {
+
+        InetAddressValidator ipValidator = InetAddressValidator.getInstance();
         ProtocolInfo protocolInfo = new ProtocolInfo();
+        if (ipValidator.isValidInet6Address(url)) {
+            protocolInfo.setHostAddress(url);
+            return protocolInfo;
+        }
+
         Matcher matcher = protocolPattern.matcher(url);
         if (matcher.find()) {
 
@@ -133,4 +155,28 @@ public class UtilTools {
         return protocolInfo;
     }
 
+    public static String iv6Expander(String ipv6) {
+        try {
+            // 解析IPv6地址
+            InetAddress address = InetAddress.getByName(ipv6);
+            // 获取展开后的地址（自动填充省略的零）
+            String expanded = address.getHostAddress();
+
+            // 分割每个块并格式化为4位十六进制
+            String[] blocks = expanded.split(":");
+            StringBuilder formatted = new StringBuilder();
+            for (String block : blocks) {
+                // 每个块补前导零至4位
+                String formattedBlock = String.format("%4s", block).replace(' ', '0');
+                formatted.append(formattedBlock).append(":");
+            }
+            // 移除末尾多余的冒号
+            formatted.setLength(formatted.length() - 1);
+            return formatted.toString();
+        } catch (Exception e) {
+            log.info("Exception e", e);
+            return ipv6;
+        }
+
+    }
 }

@@ -7,9 +7,8 @@ import org.apache.ibatis.session.SqlSession;
 import org.pierce.httpproxy.HttpProxyServer;
 import org.pierce.imp.DefaultSelector;
 import org.pierce.impl.DefaultConnectionTypeCheck;
-import org.pierce.list.imp.DataBaseNameListCheck;
-import org.pierce.list.imp.GFWNameListCheck;
-import org.pierce.list.imp.TextNameListCheck;
+import org.pierce.list.Directive;
+import org.pierce.list.imp.*;
 import org.pierce.manage.ManageServer;
 import org.pierce.mybatis.entity.HostName2Address;
 import org.pierce.mybatis.mapper.HostName2AddressMapper;
@@ -91,15 +90,15 @@ public class LocalServer {
 
 
         //+0.FixedReturnConnectListCheck
-        JproxyServer socksServer = new SocksServer();
+        JproxyServer socksServer = new SocksServer("default-name-check",new FixedReturnConnectListCheck());
         socksServer.start(eventLoopGroup);
 
         //+1.DataBaseNameListCheck
-        socksServer = new SocksServer("DataBaseNameListCheck", DataBaseNameListCheck.getInstance());
+        socksServer = new SocksServer("db-name-check", DataBaseNameListCheck.getInstance());
         socksServer.start(eventLoopGroup);
 
         //+2.TextNameListCheck
-        socksServer = new SocksServer("TextNameListCheck", new TextNameListCheck() {
+        socksServer = new SocksServer("text-name-check", new TextNameListCheck() {
             {
                 loadByInputStream();
             }
@@ -108,21 +107,25 @@ public class LocalServer {
         socksServer.start(eventLoopGroup);
 
         //+3.GFWNameListCheck
-        socksServer = new SocksServer("GFWNameListCheck", GFWNameListCheck.getInstance());
+        socksServer = new SocksServer("gfw-name-check", GFWNameListCheck.getInstance());
+        socksServer.start(eventLoopGroup);
+
+
+        socksServer = new SocksServer("local-link-out",new FixedReturnConnectListCheck(Directive.DIRECT_CONNECT));
         socksServer.start(eventLoopGroup);
 
         ////////// http proxy
         //+0.FixedReturnConnectListCheck
-        JproxyServer httpProxyServer = new HttpProxyServer();
+        JproxyServer httpProxyServer = new HttpProxyServer("default-name-check",new FixedReturnConnectListCheck());
         httpProxyServer.start(eventLoopGroup);
 
 
         //+1.DataBaseNameListCheck
-        httpProxyServer = new HttpProxyServer("DataBaseNameListCheck", DataBaseNameListCheck.getInstance());
+        httpProxyServer = new HttpProxyServer("db-name-check", DataBaseNameListCheck.getInstance());
         httpProxyServer.start(eventLoopGroup);
 
         //+2.TextNameListCheck
-        httpProxyServer = new HttpProxyServer("TextNameListCheck", new TextNameListCheck() {
+        httpProxyServer = new HttpProxyServer("text-name-check", new TextNameListCheck() {
             {
                 loadByInputStream();
             }
@@ -131,7 +134,10 @@ public class LocalServer {
         httpProxyServer.start(eventLoopGroup);
 
         //+3.GFWNameListCheck
-        httpProxyServer = new HttpProxyServer("GFWNameListCheck", GFWNameListCheck.getInstance());
+        httpProxyServer = new HttpProxyServer("gfw-name-check", GFWNameListCheck.getInstance());
+        httpProxyServer.start(eventLoopGroup);
+
+        httpProxyServer = new HttpProxyServer("local-link-out",new FixedReturnConnectListCheck(Directive.DIRECT_CONNECT));
         httpProxyServer.start(eventLoopGroup);
     }
 }

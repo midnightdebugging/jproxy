@@ -25,7 +25,7 @@ public final class HttpProxyServerInitializer extends ChannelInitializer<SocketC
     public void initChannel(SocketChannel ch) throws Exception {
 
 
-        if(nameListCheck!=null){
+        if (nameListCheck != null) {
             ch.attr(SessionAttributes.NAME_LIST_CHECK).set(nameListCheck);
         }
 
@@ -36,7 +36,9 @@ public final class HttpProxyServerInitializer extends ChannelInitializer<SocketC
         if (JproxyProperties.booleanVal("local-server.link-in.tls")) {
             ch.pipeline().addLast(TlsServerHandlerBuilder.getInstance().build(ch));
         }
-        ch.pipeline().addLast(new DebugHandler("link in"));
+        if (JproxyProperties.booleanVal("debug")) {
+            ch.pipeline().addLast(new DebugHandler("link in"));
+        }
 
         ch.pipeline().addLast(new HttpServerCodec());
         ch.pipeline().addLast(new HttpProxyServerHandler());

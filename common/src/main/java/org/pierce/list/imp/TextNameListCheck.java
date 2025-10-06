@@ -1,5 +1,7 @@
 package org.pierce.list.imp;
 
+import org.apache.commons.validator.routines.InetAddressValidator;
+import org.pierce.UtilTools;
 import org.pierce.list.Directive;
 import org.pierce.list.MatchType;
 import org.pierce.list.NameListCheck;
@@ -15,7 +17,7 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TextNameListCheck extends DefaultNameListCheck  implements NameListCheck {
+public class TextNameListCheck extends DefaultNameListCheck implements NameListCheck {
     private static final Logger log = LoggerFactory.getLogger(TextNameListCheck.class);
 
 
@@ -78,8 +80,12 @@ public class TextNameListCheck extends DefaultNameListCheck  implements NameList
                         entityDesc.setCidrLen(cidrLen);
                     }
                 }
-
-                entityDesc.setData(m0.group(3));
+                InetAddressValidator ipValidator = InetAddressValidator.getInstance();
+                if (ipValidator.isValidInet6Address(m0.group(3))) {
+                    entityDesc.setData(UtilTools.iv6Expander(m0.group(3)));
+                } else {
+                    entityDesc.setData(m0.group(3));
+                }
                 entityDescList.add(entityDesc);
 
             }
@@ -93,12 +99,27 @@ public class TextNameListCheck extends DefaultNameListCheck  implements NameList
 
     @Override
     public Directive check(String address, int port) {
+        InetAddressValidator ipValidator = InetAddressValidator.getInstance();
+
         for (EntityDesc entityDesc : entityDescList) {
             Directive directive = entityDesc.test(address);
             if (directive != Directive.MISS) {
                 return directive;
             }
         }
+
+        if (ipValidator.isValidInet6Address(address)) {
+            address = UtilTools.iv6Expander(address);
+
+            for (EntityDesc entityDesc : entityDescList) {
+                Directive directive = entityDesc.test(address);
+                if (directive != Directive.MISS) {
+                    return directive;
+                }
+            }
+        }
+
+
         return super.check(address, port);
     }
 

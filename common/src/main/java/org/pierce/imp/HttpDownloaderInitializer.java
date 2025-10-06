@@ -65,7 +65,9 @@ public class HttpDownloaderInitializer extends ChannelInitializer<SocketChannel>
         } else if (!"http://".equals(protocolInfo.getProtocol())) {
             throw new RuntimeException(String.format("protocol [%s] must be https:// or http:// .", protocolInfo.getProtocol()));
         }
-        ch.pipeline().addLast(new DebugHandler());
+        if (JproxyProperties.booleanVal("debug")) {
+            ch.pipeline().addLast(new DebugHandler());
+        }
         ch.pipeline().addLast(new HttpClientCodec());
 
         ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {

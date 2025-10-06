@@ -13,11 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public class DefaultDomainQuery {
-
-
-    public final static String remoteAddress = JproxyProperties.getProperty("local-server.link-out.address");
-
-    public final static int remotePort = Integer.parseInt(JproxyProperties.getProperty("local-server.remote-socks-link-out.port"));
+    
 
     private static final Logger log = LoggerFactory.getLogger(DefaultDomainQuery.class);
 
@@ -48,7 +44,7 @@ public class DefaultDomainQuery {
         }
         EventExecutor executor = ImmediateEventExecutor.INSTANCE;
 
-        DomainQuery domainQuery = new JproxyDomainQuery(Jproxy.getEventLoopGroup());
+        DomainQuery domainQuery = new JproxyDomainQuery();
         Promise<List<String>> jproxyPromise = executor.newPromise();
         jproxyPromise.addListener(new GenericFutureListener<Future<? super List<String>>>() {
             @Override

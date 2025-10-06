@@ -4,16 +4,11 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.http.DefaultHttpHeaders;
-import io.netty.handler.codec.http.HttpClientCodec;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
-import io.netty.handler.codec.http.websocketx.WebSocketVersion;
-import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.ImmediateEventExecutor;
 import io.netty.util.concurrent.Promise;
 import org.pierce.DomainQuery;
+import org.pierce.Jproxy;
 import org.pierce.JproxyProperties;
 import org.pierce.UtilTools;
 import org.pierce.codec.SocksCommandDNSRequest;
@@ -22,10 +17,10 @@ import org.pierce.codec.SocksCommandDuplexHandler;
 import org.pierce.codec.SocksCommandResponseCode;
 import org.pierce.handler.DebugHandler;
 import org.pierce.handler.TlsClientHandlerBuilder;
+import org.pierce.handler.WebsocketHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,15 +39,15 @@ public class JproxyDomainQuery implements DomainQuery {
 
     private static final Object channelObject = new Object();
 
-    private final EventLoopGroup eventLoopGroup;
+    //private final EventLoopGroup eventLoopGroup;
 
     public final static String remoteAddress = JproxyProperties.getProperty("local-server.link-out.address");
 
     public final static int remotePort = Integer.parseInt(JproxyProperties.getProperty("local-server.remote-websocket-link-out.port"));
 
-    public JproxyDomainQuery(EventLoopGroup eventLoopGroup) {
-        this.eventLoopGroup = eventLoopGroup;
-    }
+//    public JproxyDomainQuery(EventLoopGroup eventLoopGroup) {
+//        this.eventLoopGroup = eventLoopGroup;
+//    }
 
     @Override
     public void query(String domain, Promise<List<String>> promise) throws ExecutionException, InterruptedException, URISyntaxException {
@@ -81,26 +76,11 @@ public class JproxyDomainQuery implements DomainQuery {
 
     public Promise<Channel> newChannel0() throws URISyntaxException {
 
-        String url = JproxyProperties.evaluate("${local-server.link-out.address}:${local-server.remote-websocket-link-out.port}/${local-server.link-out.websocket-path}");
-        if (JproxyProperties.booleanVal("local-server.link-out.tls")) {
-            url = "wss://" + url;
-        } else {
-            url = "ws://" + url;
-        }
-        URI uri = new URI(url);
-        final WebSocketClientHandler handler =
-                new WebSocketClientHandler(
-                        WebSocketClientHandshakerFactory.newHandshaker(
-                                uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders() {
-                                    {
-                                        add("WORK_TYPE", "02");
-                                    }
-                                }));
 
         EventExecutor executor = ImmediateEventExecutor.INSTANCE;
         Promise<Channel> channelPromise = executor.newPromise();
         Bootstrap bootstrap = new Bootstrap();
-        bootstrap.group(eventLoopGroup);
+        bootstrap.group(Jproxy.getEventLoopGroup());
         bootstrap.channel(NioSocketChannel.class);
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             @Override
@@ -111,18 +91,16 @@ public class JproxyDomainQuery implements DomainQuery {
                 if (JproxyProperties.booleanVal("local-server.link-out.tls")) {
                     ch.pipeline().addLast(TlsClientHandlerBuilder.getInstance().build(ch));
                 }
-                ch.pipeline().addLast(new DebugHandler("link-in"));
-                ch.pipeline().addLast(new HttpClientCodec());
-                ch.pipeline().addLast(new HttpObjectAggregator(8192));
-                ch.pipeline().addLast(new WebSocketClientCompressionHandler(8192));
-                ch.pipeline().addLast(handler);
+                if(JproxyProperties.booleanVal("debug")){
+                    ch.pipeline().addLast(new DebugHandler("link-in"));
+                }
+                ch.pipeline().addLast(new WebsocketHandler());
                 ch.pipeline().addLast(new SocksCommandDuplexHandler());
                 ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
                     @Override
                     public void channelRead(ChannelHandlerContext linkOutCtx, Object msg) throws Exception {
-                        log.info("yyy:{}", msg);
-                        if (msg instanceof SocksCommandDNSResponse) {
-                            SocksCommandDNSResponse response = (SocksCommandDNSResponse) msg;
+                        //log.info("{}", msg);
+                        if (msg instanceof SocksCommandDNSResponse response) {
 
                             synchronized (taskIndex) {
                                 if (taskIndex.containsKey(response.getDomain())) {
@@ -167,14 +145,7 @@ public class JproxyDomainQuery implements DomainQuery {
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (future.isSuccess()) {
                     log.info("connect {}:{} future.isSuccess()", remoteAddress, remotePort);
-                    //channelPromise.trySuccess(future.channel());
-                    handler.handshakeFuture().addListener(future1 -> {
-                        if(future1.isSuccess()){
-                           channelPromise.trySuccess(future.channel());
-                        }else{
-                            channelPromise.tryFailure(future1.cause());
-                        }
-                    });
+                    channelPromise.trySuccess(future.channel());
                     return;
                 }
                 log.info("connect {}:{} fail", remoteAddress, remotePort);

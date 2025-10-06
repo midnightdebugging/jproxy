@@ -34,10 +34,11 @@ public class SocksCommandClientTest {
                     if (JproxyProperties.booleanVal("tls-debug")) {
                         ch.pipeline().addLast(new DebugHandler("tls-link-out"));
                     }
-                    if (true) {
-                        ch.pipeline().addLast(TlsClientHandlerBuilder.getInstance().build(ch));
+                    ch.pipeline().addLast(TlsClientHandlerBuilder.getInstance().build(ch));
+                    if (JproxyProperties.booleanVal("debug")) {
+                        ch.pipeline().addLast(new DebugHandler());
                     }
-                    ch.pipeline().addLast(new DebugHandler());
+
                     ch.pipeline().addLast(new SocksCommandCodec());
                     ch.pipeline().addLast(new SimpleChannelInboundHandler<SocksCommand>() {
                         @Override
