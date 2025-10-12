@@ -15,7 +15,7 @@ public class EntityDesc {
 
     String data;
 
-    Pattern pattern;
+    transient Pattern pattern;
 
 
     String address;
@@ -86,6 +86,7 @@ public class EntityDesc {
                     return directive;
                 }
             }
+
 
         }
         return Directive.MISS;

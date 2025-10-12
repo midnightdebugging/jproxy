@@ -8,6 +8,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import org.pierce.JproxyProperties;
 import org.pierce.handler.DebugHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,11 +37,12 @@ public class SocksCommandServerTest {
                     .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
                     .option(ChannelOption.SO_KEEPALIVE, true)
                     .channel(NioServerSocketChannel.class)
-                    //.handler(new DebugHandler())
                     .childHandler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(new DebugHandler());
+                            if (JproxyProperties.booleanVal("debug")) {
+                                ch.pipeline().addLast(new DebugHandler());
+                            }
                             ch.pipeline().addLast(new SocksCommandCodec());
                             ch.pipeline().addLast(new SimpleChannelInboundHandler<SocksCommand>() {
                                 @Override

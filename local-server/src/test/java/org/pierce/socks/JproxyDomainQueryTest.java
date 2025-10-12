@@ -1,8 +1,5 @@
 package org.pierce.socks;
 
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.MultiThreadIoEventLoopGroup;
-import io.netty.channel.nio.NioIoHandler;
 import io.netty.util.concurrent.*;
 import org.pierce.impl.JproxyDomainQuery;
 import org.slf4j.Logger;
@@ -17,18 +14,10 @@ public class JproxyDomainQueryTest {
     private static final Logger log = LoggerFactory.getLogger(JproxyDomainQueryTest.class);
 
     public static void main(String[] args) throws ExecutionException, InterruptedException, URISyntaxException {
-        EventLoopGroup eventLoopGroup = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
 
-                log.info("eventLoopGroup.shutdownGracefully();");
-                eventLoopGroup.shutdownGracefully();
-            }
-        });
 
         String[] hostNameArr = new String[]{
-                "github.com"
+                "baidu.com"
         };
         EventExecutor executor = ImmediateEventExecutor.INSTANCE;
         for (String hostName : hostNameArr) {
@@ -43,7 +32,7 @@ public class JproxyDomainQueryTest {
                     log.info("{} fail", hostName);
                 }
             });
-            JproxyDomainQuery jproxyDomainQuery = new JproxyDomainQuery(eventLoopGroup);
+            JproxyDomainQuery jproxyDomainQuery = new JproxyDomainQuery();
             jproxyDomainQuery.query(hostName, promise0);
         }
 

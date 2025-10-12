@@ -6,6 +6,7 @@ import io.netty.channel.nio.NioIoHandler;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.pierce.JproxyProperties;
 import org.pierce.JproxyServer;
+import org.pierce.LocalServer;
 import org.pierce.httpproxy.handler.HttpProxyServerInitializer;
 import org.pierce.list.NameListCheck;
 import org.pierce.list.imp.FixedReturnConnectListCheck;
@@ -59,7 +60,7 @@ public class HttpProxyServer implements JproxyServer {
             @Override
             public void operationComplete(ChannelFuture future1) throws Exception {
                 if (future1.isSuccess()) {
-                    log.info("bind {} success", port);
+                    //log.info("bind {} success", port);
                     future1.channel().closeFuture().addListener(new ChannelFutureListener() {
                         @Override
                         public void operationComplete(ChannelFuture future2) throws Exception {
@@ -74,6 +75,9 @@ public class HttpProxyServer implements JproxyServer {
     }
 
     public static void main(String[] args) {
+
+        LocalServer.getInstance().initialize();
+
         EventLoopGroup eventLoopGroup = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override

@@ -4,8 +4,8 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
-import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 import org.pierce.JproxyProperties;
+import org.pierce.codec.SocksCommandDuplexHandler;
 import org.pierce.handler.DebugHandler;
 import org.pierce.handler.TlsServerHandlerBuilder;
 
@@ -23,13 +23,16 @@ public class RemoteWebSocketChannelInitializer extends ChannelInitializer<Socket
         if (JproxyProperties.booleanVal("remote-server.link-tls")) {
             ch.pipeline().addLast(TlsServerHandlerBuilder.getInstance().build(ch));
         }
-        ch.pipeline().addLast(new DebugHandler("link-in"));
+        if (!JproxyProperties.booleanVal("debug")) {
+            ch.pipeline().addLast(new DebugHandler("link-in"));
+        }
 
-        ch.pipeline().addLast(new HttpServerCodec());
-        ch.pipeline().addLast(new HttpObjectAggregator(65536));
-        ch.pipeline().addLast(new RemoteWebSocketHttpHandler());
-        ch.pipeline().addLast(new WebSocketServerProtocolHandler(WEBSOCKET_PATH, null, true));
-        //ch.pipeline().addLast(new WebSocketFrameHandler());
+
+        ch.pipeline().addLast("http-codec",new HttpServerCodec());
+        ch.pipeline().addLast("http-aggregator",new HttpObjectAggregator(65536));
+        ch.pipeline().addLast(new RemoteWebSocketHandler());
+        ch.pipeline().addLast(new SocksCommandDuplexHandler());
+        ch.pipeline().addLast(new RemoteWebSocketSocksHandler());
     }
 
 }
